@@ -20,7 +20,6 @@ spec:
                 values:
                   - NVIDIA-A10
                   
-
       containers:
       - name: train
         image: docker.io/troyk500/qwen-nrp:latest
