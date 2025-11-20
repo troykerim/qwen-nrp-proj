@@ -127,7 +127,7 @@ def main():
 
     # Define LoRA adapters
     lora_cfg = LoraConfig(
-        r=64,
+        r=8,
         lora_alpha=16,
         lora_dropout=0.05,
         bias="none",
