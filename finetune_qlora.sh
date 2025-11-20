@@ -19,8 +19,8 @@ torchrun --nproc_per_node=1 src/train/train.py \
   --bnb_4bit_use_double_quant true \       # double quantization for lower VRAM
   --bnb_4bit_quant_type nf4 \              # NF4 quantization (standard for QLoRA)
   --use_liger false \                      # must disable liger kernel
-  --lora_rank 64 \
-  --lora_alpha 128 \
+  --lora_rank 8 \
+  --lora_alpha 32 \
   --lora_dropout 0.05 \
   --freeze_vision_tower false \
   --freeze_llm false \

@@ -105,5 +105,5 @@ Fine-tuning Qwen on jam-causing materials enables earlier detection and interven
 This work is part of the **Recykool Project**, which aims to improve recycling systems, reduce contamination, and enhance environmental sustainability using AI and digital twin technologies.  
 Training infrastructure is supported by the **Pacific Research Platform (PRP) Nautilus**.
 
-Project webiste:
+Project website:
 - [ARCS](https://arcs.center/workers-and-technology-together-watt-and-recykool-reduce-methane-landfill-emissions-through-citizen-science-community-outreach/)
