@@ -24,7 +24,7 @@ spec:
       containers:
       - name: train
         image: docker.io/troyk500/qwen-nrp:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: ["/bin/bash", "-lc"]
         args:
           - |
