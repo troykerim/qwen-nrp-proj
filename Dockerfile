@@ -1,32 +1,27 @@
-# NVIDIA PyTorch base image (CUDA 12.2 runtime) – compatible with bitsandbytes
-FROM nvcr.io/nvidia/pytorch:24.03-py3
+# Use NVIDIA PyTorch 23.09 or 24.03
+FROM nvcr.io/nvidia/pytorch:23.09-py3
 
 LABEL maintainer="troyk500" \
-      description="Qwen2.5-VL-7B QLoRA fine-tuning environment based on InternVL Dockerfile"
-
-# Main working directory
+      description="Clean minimal Qwen2.5-VL-7B QLoRA environment (CUDA 12.1)"
 WORKDIR /workspace
 
-# Install pinned dependencies 
-RUN pip install -U pip \
+RUN pip install --upgrade pip \
  && pip install "numpy<2.0" \
- && pip install "scipy<1.14" \
- && pip install "contourpy<1.3.0" \
- && pip install "ipython<9.0.0"
+ && pip install packaging
 
-# Install Qwen-VL utilities and training dependencies
-RUN pip install qwen-vl-utils \
- && pip install bitsandbytes==0.43.1 \
- && pip install peft==0.10.0
+# transformers >= 4.39 REQUIRED for AutoModelForImageTextToText
+RUN pip install --upgrade --force-reinstall transformers==4.40.2
 
+RUN pip install datasets==2.17.1 \
+ && pip install accelerate==0.28.0
+
+RUN pip install qwen-vl-utils
+RUN pip install sentencepiece
+RUN pip install pillow==10.2.0
+RUN pip install bitsandbytes==0.43.1
 RUN pip install flash-attn --no-build-isolation
+RUN pip install peft==0.10.0
 
-# Install HuggingFace Transformers + Datasets
-RUN pip install transformers==4.40.2 \
- && pip install datasets==2.17.1 \
- && pip install accelerate==0.28.0 \
- && pip install sentencepiece \
- && pip install pillow==10.2.0
 
 RUN rm -rf /root/.cache/pip
 
