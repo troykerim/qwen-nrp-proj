@@ -6,8 +6,9 @@ LABEL maintainer="troyk500" \
 WORKDIR /workspace
 
 RUN pip install --upgrade pip \
- && pip install "numpy<2.0" \
  && pip install packaging
+
+RUN pip install --upgrade --force-reinstall "numpy==1.26.4"
 
 # transformers >= 4.39 REQUIRED for AutoModelForImageTextToText
 RUN pip install --upgrade --force-reinstall transformers==4.40.2
