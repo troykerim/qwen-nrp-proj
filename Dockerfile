@@ -1,32 +1,38 @@
-FROM nvcr.io/nvidia/pytorch:23.09-py3
+FROM nvcr.io/nvidia/pytorch:24.03-py3
 
 LABEL maintainer="troyk500" \
       description="Qwen2.5-VL-7B QLoRA environment"
+# System setup
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y git \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# Python packages
+RUN pip install -U pip \
+    && pip install \
+        numpy==1.26.4 \
+        pandas==2.2.2 \
+        transformers==4.37.2 \
+        datasets==2.18.0 \
+        peft==0.10.0 \
+        accelerate==0.27.2 \
+        timm==0.9.12 \
+        bitsandbytes==0.43.1 \
+        sentencepiece==0.1.99 \
+        safetensors==0.4.2 \
+        Pillow==10.2.0 \
+        einops==0.7.0 \
+        huggingface_hub==0.20.2 \
+        protobuf==4.25.8 \
+        opencv-python-headless==4.9.0.80
+
+# Hugging Face cache directories
+ENV HF_HOME=/workspace/.cache/huggingface \
+    TRANSFORMERS_CACHE=/workspace/.cache/huggingface \
+    HF_DATASETS_CACHE=/workspace/.cache/huggingface/datasets \
+    PIP_CACHE_DIR=/workspace/.cache/pip \
+    TMPDIR=/workspace/tmp
+
 WORKDIR /workspace
-
-# Upgrade pip first
-RUN pip install --upgrade pip
-
-# Install all deps in one go to avoid version conflicts
-# Pin numpy to <2 explicitly and early in the list
-RUN pip install --no-cache-dir \
-    "numpy==1.26.4" \
-    "transformers==4.40.2" \
-    "datasets==2.17.1" \
-    "accelerate==0.28.0" \
-    "peft==0.10.0" \
-    "bitsandbytes==0.43.1" \
-    "sentencepiece" \
-    "qwen-vl-utils" \
-    "pillow==10.2.0" \
-    "packaging" \
-    "scipy==1.11.4" \
-    && \
-    pip install --no-cache-dir --no-build-isolation "flash-attn" \
-    && \
-    pip check  # Optional: verify no conflicts
-
-# Clean up
-RUN rm -rf /root/.cache/pip
-
+COPY . /workspace
 CMD ["bash"]
