@@ -1,0 +1,124 @@
+As a backup incase google colab doesn't work for whatever way.
+BASE = "/content/drive/MyDrive/model_datasets/dataset"
+
+TRAIN_IMG_DIR = f"{BASE}/train/images"
+TRAIN_LBL_DIR = f"{BASE}/train/labels"
+
+OUT_TRAIN = "/content/drive/MyDrive/model_datasets/train.jsonl"
+OUT_VALID = "/content/drive/MyDrive/model_datasets/valid.jsonl"   # commented out
+
+
+# =====================================================================
+# Parse Pascal VOC label format
+# Format:
+#   ClassName xmin xmax ymin ymax
+# =====================================================================
+def load_voc_labels(label_path):
+    entries = []
+    with open(label_path, "r") as f:
+        for line in f:
+            parts = line.strip().split()
+            if len(parts) != 5:
+                continue
+
+            cls, xmin, xmax, ymin, ymax = parts
+            entries.append(f"{cls} {xmin} {xmax} {ymin} {ymax}")
+
+    return entries
+
+
+# =====================================================================
+# Build JSON entry EXACTLY like train.v2.jsonl
+# =====================================================================
+def build_jsonl_entry(image_path, bbox_lines):
+
+    # EXACT system message (word-for-word from your sample)
+    system_msg = {
+        "role": "system",
+        "content":
+            "You are an assistant that detects waste objects in images. "
+            "The possible waste categories are: Glass-A, Green waste-A, Metal, "
+            "Organics-A, Organics-B-NOT, Organics-E, Others, Paper-A, Paper-B, Paper-D, "
+            "Plastic-A, Plastic-B, Plastic-C, Plastic-D, Plastic-E, Plastic-G, Wood."
+    }
+
+    # EXACT user message structure
+    user_msg = {
+        "role": "user",
+        "content": [
+            {"type": "image", "image": image_path},
+            {"type": "text",
+             "text": "Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax"},
+        ],
+    }
+
+    # Assistant output MUST BE:
+    #   "Plastic-E 823 1021 69 358\nPlastic-D ... ..."
+    assistant_msg = {
+        "role": "assistant",
+        "content": "\n".join(bbox_lines)
+    }
+
+    return {"messages": [system_msg, user_msg, assistant_msg]}
+
+
+# =====================================================================
+# Main JSONL generator
+# =====================================================================
+def generate_jsonl(img_dir, lbl_dir, output_path):
+
+    image_files = sorted([
+        f for f in os.listdir(img_dir)
+        if f.lower().endswith((".jpg", ".jpeg", ".png"))
+    ])
+
+    entries = []
+
+    for img_name in image_files:
+        stem = Path(img_name).stem
+        lbl_path = f"{lbl_dir}/{stem}.txt"
+
+        if not os.path.exists(lbl_path):
+            continue
+
+        bbox_lines = load_voc_labels(lbl_path)
+        if not bbox_lines:
+            continue
+
+        # Google-Drive image path for Qwen training
+        img_path = f"{img_dir}/{img_name}"
+
+        entry = build_jsonl_entry(img_path, bbox_lines)
+        entries.append(entry)
+
+    # Write JSONL
+    with open(output_path, "w") as f:
+        for e in entries:
+            f.write(json.dumps(e) + "\n")
+
+    print(f"✔ Created {len(entries)} entries → {output_path}")
+
+
+# =====================================================================
+# RUN: Only make train.jsonl first
+# =====================================================================
+print("Generating train.jsonl...")
+generate_jsonl(TRAIN_IMG_DIR, TRAIN_LBL_DIR, OUT_TRAIN)
+
+# =====================================================================
+# Later, uncomment this to generate valid.jsonl
+# =====================================================================
+# print("Generating valid.jsonl...")
+# generate_jsonl(f"{BASE}/valid/images", f"{BASE}/valid/labels", OUT_VALID)
+
+
+I need a small modification to run this in my local pc.
+1. the BASE = /home/troy/qwen-nrp-proj/dataset
+2. You must keep OUT_TRAIN and OUT_VALID but will save them at this paths: /home/troy/qwen-nrp-proj/train.jsonl  & /home/troy/qwen-nrp-proj/valid.jsonl 
+
+3. You will make another modification where you will use the OUT_TRAIN and OUT_VALID paths for this section here:
+{"role": "user", "content": [{"type": "image", "image": "file:///home/jovyan/data/imagesFull/9-2800224_jpg_jpg.rf.0afe92a491fad6feae5da803a8c8688a.jpg"},  
+
+Where the file:///home/jovyan/data/imagesFull/ is replace with /content/drive/MyDrive/model_datasets/dataset/train/images & you must add the image name from my local pc.
+
+So it adding that google drive/colab path with the associated image name that is located on my local pc.
