@@ -1,37 +1,27 @@
-FROM nvcr.io/nvidia/pytorch:24.03-py3
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 
-LABEL maintainer="troyk500" \
-      description="Qwen2.5-VL-7B QLoRA environment"
-# System setup
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y git \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+RUN apt-get update && \
+    apt-get install -y git wget curl python3 python3-pip && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    pip install --upgrade pip
 
-# Python packages
-RUN pip install -U pip \
-    && pip install \
-        numpy==1.26.4 \
-        pandas==2.2.2 \
-        transformers==4.37.2 \
-        datasets==2.18.0 \
-        peft==0.10.0 \
-        accelerate==0.27.2 \
-        timm==0.9.12 \
-        bitsandbytes==0.43.1 \
-        sentencepiece==0.1.99 \
-        safetensors==0.4.2 \
-        Pillow==10.2.0 \
-        einops==0.7.0 \
-        huggingface_hub==0.20.2 \
-        protobuf==4.25.8 \
-        opencv-python-headless==4.9.0.80
+RUN pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cu121
 
-# Hugging Face cache directories
-ENV HF_HOME=/workspace/.cache/huggingface \
-    TRANSFORMERS_CACHE=/workspace/.cache/huggingface \
-    HF_DATASETS_CACHE=/workspace/.cache/huggingface/datasets \
-    PIP_CACHE_DIR=/workspace/.cache/pip \
-    TMPDIR=/workspace/tmp
+RUN pip install \
+    "transformers==4.57.1" \
+    "accelerate>=0.34.2" \
+    "peft>=0.13.2" \
+    "bitsandbytes>=0.43.0" \
+    "sentencepiece" \
+    "einops" \
+    "timm" \
+    "qwen-vl-utils"
+
+# Optional (May or may not worK?)
+# RUN pip install "datasets" "huggingface_hub" "scipy"
+
+ENV PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+ENV TF_CPP_MIN_LOG_LEVEL=3
 
 WORKDIR /workspace
 COPY . /workspace
