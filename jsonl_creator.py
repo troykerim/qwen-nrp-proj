@@ -2,129 +2,108 @@ import os
 import json
 from pathlib import Path
 
-# -------------------------------------------------------------------
-# GOOGLE COLAB + GOOGLE DRIVE PATHS
-# -------------------------------------------------------------------
-DATASET_DIR = "/home/troy/qwen-nrp-proj/dataset"
+BASE = "/home/troy/qwen-nrp-proj/dataset"
 
-TRAIN_IMG_DIR = f"{DATASET_DIR}/train/images"
-TRAIN_LBL_DIR = f"{DATASET_DIR}/train/labels"
+TRAIN_IMG_DIR = f"{BASE}/train/images"
+TRAIN_LBL_DIR = f"{BASE}/train/labels"
 
-# Output JSONL files (focus on train first)
-TRAIN_JSONL = "/home/troy/qwen-nrp-proj/train.jsonl"
-VALID_JSONL = "/home/troy/qwen-nrp-proj/valid.jsonl" # Not used yet
+VALID_IMG_DIR = f"{BASE}/valid/images"
+VALID_LBL_DIR = f"{BASE}/valid/labels"
 
+# Only run Train or Valid, not at the same time
+# OUT_TRAIN = "/home/troy/qwen-nrp-proj/train.jsonl"  
+OUT_VALID = "/home/troy/qwen-nrp-proj/valid.jsonl"  
+NAUTILUS_BASE = "/workspace/data/dataset"
 
-# -------------------------------------------------------------------
-# Parse Pascal VOC text label file
-# Format: class_name xmin ymin xmax ymax
-# -------------------------------------------------------------------
-def load_voc_label(label_path):
-    boxes = []
+# Parse Pascal VOC label format
+# Format: ClassName xmin xmax ymin ymax
+def load_voc_labels(label_path):
+    entries = []
     with open(label_path, "r") as f:
         for line in f:
             parts = line.strip().split()
             if len(parts) != 5:
                 continue
 
-            cls, xmin, ymin, xmax, ymax = parts
+            cls, xmin, xmax, ymin, ymax = parts
+            entries.append(f"{cls} {xmin} {xmax} {ymin} {ymax}")
 
-            boxes.append({
-                "class_name": cls,
-                "xmin": int(xmin),
-                "ymin": int(ymin),
-                "xmax": int(xmax),
-                "ymax": int(ymax)
-            })
+    return entries
 
-    return boxes
+def to_nautilus_path(local_img_path):
 
+    local_suffix = local_img_path.split("/dataset/", 1)[1]
+    return f"{NAUTILUS_BASE}/{local_suffix}"
 
-# -------------------------------------------------------------------
-# Build JSONL entry according to Qwen2.5-VL supervised tuning format
-# -------------------------------------------------------------------
-def build_jsonl_entry(image_path, boxes):
-    messages = []
+def build_jsonl_entry(image_path_local, bbox_lines):
 
-    # System prompt
-    messages.append({
+    # Convert path inside JSONL to Nautilus path
+    image_path = to_nautilus_path(image_path_local)
+
+    system_msg = {
         "role": "system",
-        "content": "You are an AI assistant that identifies objects and outputs bounding boxes in <bbox> format."
-    })
+        "content":
+            "You are an assistant that detects waste objects in images. "
+            "The possible waste categories are: Glass-A, Green waste-A, Metal, "
+            "Organics-A, Organics-B-NOT, Organics-E, Others, Paper-A, Paper-B, Paper-D, "
+            "Plastic-A, Plastic-B, Plastic-C, Plastic-D, Plastic-E, Plastic-G, Wood."
+    }
 
-    # User message containing the image
-    messages.append({
+    user_msg = {
         "role": "user",
         "content": [
             {"type": "image", "image": image_path},
-            {"type": "text", "text": "Identify all objects in the image and output bounding boxes."}
-        ]
-    })
+            {"type": "text",
+             "text": "Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax"},
+        ],
+    }
 
-    # Assistant message containing bounding boxes in tag format
-    bbox_list = []
-    for b in boxes:
-        bbox_list.append(
-            f"<bbox class='{b['class_name']}' "
-            f"xmin='{b['xmin']}' ymin='{b['ymin']}' "
-            f"xmax='{b['xmax']}' ymax='{b['ymax']}'></bbox>"
-        )
-
-    messages.append({
+    assistant_msg = {
         "role": "assistant",
-        "content": [
-            {"type": "text", "text": " ".join(bbox_list)}
-        ]
-    })
+        "content": "\n".join(bbox_lines)
+    }
 
-    return {"messages": messages}
+    return {"messages": [system_msg, user_msg, assistant_msg]}
 
 
-# -------------------------------------------------------------------
-# Process a split (train or valid)
-# -------------------------------------------------------------------
-def process_split(img_dir, lbl_dir, output_path):
-    img_files = sorted([f for f in os.listdir(img_dir)
-                        if f.lower().endswith((".jpg", ".png", ".jpeg"))])
+# Format the JSONL file 
+def generate_jsonl(img_dir, lbl_dir, output_path):
 
-    jsonl_entries = []
+    image_files = sorted([
+        f for f in os.listdir(img_dir)
+        if f.lower().endswith((".jpg", ".jpeg", ".png"))
+    ])
 
-    for img_name in img_files:
+    entries = []
+
+    for img_name in image_files:
         stem = Path(img_name).stem
         lbl_path = f"{lbl_dir}/{stem}.txt"
 
         if not os.path.exists(lbl_path):
             continue
 
-        boxes = load_voc_label(lbl_path)
-        if not boxes:
+        bbox_lines = load_voc_labels(lbl_path)
+        if not bbox_lines:
             continue
 
-        # IMPORTANT: Use Google Drive path for Qwen VL training
-        full_img_path = f"{img_dir}/{img_name}"
+        # LOCAL PC path
+        local_img_path = f"{img_dir}/{img_name}"
 
-        entry = build_jsonl_entry(full_img_path, boxes)
-        jsonl_entries.append(entry)
+        entry = build_jsonl_entry(local_img_path, bbox_lines)
+        entries.append(entry)
 
-    # Write JSONL file
     with open(output_path, "w") as f:
-        for entry in jsonl_entries:
-            f.write(json.dumps(entry) + "\n")
+        for e in entries:
+            f.write(json.dumps(e) + "\n")
 
-    print(f"Created {len(jsonl_entries)} entries → {output_path}")
+    print(f"Created {len(entries)} entries → {output_path}")
+    
+# For train.jsonl 
+# print("Generating train.jsonl...")
+#generate_jsonl(TRAIN_IMG_DIR, TRAIN_LBL_DIR, OUT_TRAIN)
 
+# Uncomment for valid.jsonl
+print("Generating valid.jsonl...")
+generate_jsonl(VALID_IMG_DIR, VALID_LBL_DIR, OUT_VALID)
 
-# -------------------------------------------------------------------
-# MAIN: Only train.jsonl first
-# -------------------------------------------------------------------
-if __name__ == "__main__":
-    print("Generating train.jsonl ...")
-    process_split(TRAIN_IMG_DIR, TRAIN_LBL_DIR, TRAIN_JSONL)
-
-    # ---- Uncomment this block when ready to generate valid.jsonl ----
-    # print("Generating valid.jsonl ...")
-    # process_split(
-    #     f"{DATASET_DIR}/valid/images",
-    #     f"{DATASET_DIR}/valid/labels",
-    #     VALID_JSONL
-    # )
