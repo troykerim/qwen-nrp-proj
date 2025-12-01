@@ -4,7 +4,7 @@
 ---
 
 ## Overview
-This repository documents the fine-tuning of **Qwen2.5-VL-7B** using **QLoRA** on the **Pacific Research Platform (PRP) Nautilus** Kubernetes cluster.  
+This repository documents the fine-tuning of **Qwen2.5-VL-7B** using **QLoRA** on the **National Research Platform (NRP) Nautilus** Kubernetes cluster.  
 The goal is to develop a **Vision-Language Model (VLM)** capable of identifying **jam-causing material** on recycling conveyor belts in Material Recovery Facilities (MRFs).
 
 The model is trained on a **proprietary dataset** containing real conveyor-belt images from active MRF environments, including challenging conditions such as variable lighting, cluttered scenes, motion blur, overlapping waste, and diverse contamination patterns.
@@ -103,7 +103,7 @@ Fine-tuning Qwen on jam-causing materials enables earlier detection and interven
 
 ## Acknowledgments
 This work is part of the **Recykool Project**, which aims to improve recycling systems, reduce contamination, and enhance environmental sustainability using AI and digital twin technologies.  
-Training infrastructure is supported by the **Pacific Research Platform (PRP) Nautilus**.
+Training infrastructure is supported by the **National Research Platform (NRP) Nautilus**.
 
 Project website:
 - [ARCS](https://arcs.center/workers-and-technology-together-watt-and-recykool-reduce-methane-landfill-emissions-through-citizen-science-community-outreach/)

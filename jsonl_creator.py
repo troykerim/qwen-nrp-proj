@@ -1,3 +1,6 @@
+'''
+    JSONL file formater for formatting the Dataset into string tokens that are accepted by Qwen 
+'''
 import os
 import json
 from pathlib import Path
