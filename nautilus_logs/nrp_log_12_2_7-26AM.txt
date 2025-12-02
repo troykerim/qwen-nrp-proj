@@ -1,0 +1,351 @@
+$ kubectl logs -f job/qwen7b-qlora-job -n nsf-maica
++ python -V
+Python 3.10.12
++ nvidia-smi
+Mon Dec  1 18:11:29 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.95.05              Driver Version: 580.95.05      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A10                     On  |   00000000:25:00.0 Off |                    0 |
+|  0%   31C    P8             23W /  150W |       4MiB /  23028MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
++ echo '[INFO] Checking Qwen model in PVC...'
++ ls -al /workspace/models/Qwen2.5-VL-7B-Instruct
+[INFO] Checking Qwen model in PVC...
+total 16207052
+drwxr-xr-x 2 root root       4096 Nov  8 22:11 .
+drwxr-xr-x 4 root root         54 Nov  8 21:48 ..
+-rw-rw-r-- 1 1000 1000      18574 Nov  8 21:57 README.md
+-rw-rw-r-- 1 1000 1000       1050 Nov  8 21:57 chat_template.json
+-rw-rw-r-- 1 1000 1000       1374 Nov  8 21:57 config.json
+-rw-rw-r-- 1 1000 1000        216 Nov  8 21:57 generation_config.json
+-rw-rw-r-- 1 1000 1000    1671839 Nov  8 21:57 merges.txt
+-rw-rw-r-- 1 1000 1000 3900233256 Nov  8 21:58 model-00001-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864726320 Nov  8 22:00 model-00002-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864726424 Nov  8 22:01 model-00003-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864733680 Nov  8 22:03 model-00004-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 1089994880 Nov  8 22:03 model-00005-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000      57619 Nov  8 22:03 model.safetensors.index.json
+-rw-rw-r-- 1 1000 1000        350 Nov  8 22:03 preprocessor_config.json
+-rw-rw-r-- 1 1000 1000    7031645 Nov  8 22:03 tokenizer.json
+-rw-rw-r-- 1 1000 1000       5702 Nov  8 22:03 tokenizer_config.json
+-rw-rw-r-- 1 1000 1000    2776833 Nov  8 22:03 vocab.json
++ echo '[INFO] Dataset contents:'
++ ls -al /workspace/data
+[INFO] Dataset contents:
+total 3888
+drwxr-xr-x  6 root root     169 Nov 28 18:04 .
+drwxr-xr-x 11 root root    4096 Nov 28 18:52 ..
+drwxr-xr-x  4 root root      32 Nov  9 23:28 dataset
+drwxr-xr-x  2 root root   86016 Oct 13 18:51 images
+drwxr-xr-x  2 root root   86016 Oct 13 18:51 labels
+-rw-rw-r--  1 1000 1000     230 Oct 13 23:12 maica_internvl_sft.json
+-rw-rw-r--  1 1000 1000 1622935 Oct 13 23:12 maica_internvl_sft.jsonl
+drwxr-xr-x  4 root root      34 Oct 29 04:25 test_images
+-rw-rw-r--  1 1000 1000 1903572 Nov 28 18:04 train.jsonl
+-rw-rw-r--  1 1000 1000  214546 Nov 28 18:04 valid.jsonl
+[INFO] Starting QLoRA fine-tuning...
++ echo '[INFO] Starting QLoRA fine-tuning...'
++ python /workspace/qwen-train-qlora.py
+/usr/local/lib/python3.10/dist-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+Collator defined - matching from end of sequence
+Loading checkpoint shards: 100%|██████████| 5/5 [49:55<00:00, 599.09s/it]
+The image processor of type `Qwen2VLImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. Note that this behavior will be extended to all models in a future release.
+/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+Model loaded with 8-bit quantization: Qwen2_5_VLForConditionalGeneration
+trainable params: 5,046,272 || all params: 8,297,212,928 || trainable%: 0.0608
+8-bit QLoRA configured
+Loading training data...
+Loaded 1794 training samples
+Loading validation data...
+Loaded 186 validation samples
+
+======================================================================
+Dataset Summary:
+  Train:      1794 examples
+  Validation: 186 examples
+  Total:      1980 examples
+======================================================================
+Configuring TrainingArguments...
+TrainingArguments ready.
+
+Initializing Trainer...
+Trainer initialized.
+
+======================================================================
+FINAL COLLATOR VERIFICATION
+======================================================================
+
+Batch size: 2
+Sequence length: 3272
+
+Example 1:
+  Learning from: 464/3272 tokens (14.2%)
+  Expected: 464 tokens
+  Match: PERFECT
+
+Example 2:
+  Learning from: 471/3272 tokens (14.4%)
+  Expected: 471 tokens
+  Match: PERFECT
+
+======================================================================
+COLLATOR STATUS: READY FOR TRAINING ✓
+======================================================================
+
+Training on 1794 examples
+Validating on 186 examples
+Starting training...
+
+  0%|          | 0/675 [00:00<?, ?it/s]/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'loss': 1.7835, 'grad_norm': 0.5309224128723145, 'learning_rate': 1.8e-05, 'epoch': 0.04}
+{'loss': 1.7512, 'grad_norm': 0.9466415643692017, 'learning_rate': 3.8e-05, 'epoch': 0.09}
+{'loss': 1.5649, 'grad_norm': 0.48289358615875244, 'learning_rate': 5.8e-05, 'epoch': 0.13}
+{'loss': 1.4106, 'grad_norm': 0.2762504816055298, 'learning_rate': 7.800000000000001e-05, 'epoch': 0.18}
+  7%|▋         | 50/675 [38:18<7:55:30, 45.65s/it]
+{'loss': 1.365, 'grad_norm': 0.6500254273414612, 'learning_rate': 9.8e-05, 'epoc  7%|▋         | 50/675 [47:24<7:55:30, 45.65s/it/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.3392605781555176, 'eval_runtime': 546.3073, 'eval_samples_per_second': 0.34, 'eval_steps_per_second': 0.34, 'epoch': 0.22}
+{'loss': 1.2692, 'grad_norm': 0.7936073541641235, 'learning_rate': 0.000118, 'epoch': 0.27}
+{'loss': 1.1746, 'grad_norm': 0.5776851773262024, 'learning_rate': 0.000138, 'epoch': 0.31}
+{'loss': 1.143, 'grad_norm': 0.5021286606788635, 'learning_rate': 0.00015800000000000002, 'epoch': 0.36}
+ 15%|█▍        | 100/675 [1:25:28<7:18:34, 45.76s/it]
+{'loss': 1.1119, 'grad_norm': 0.5083978176116943, 'learning_rate': 0.00017800000000000002, 'epoch': 0.4}
+{'loss': 1.0925, 'grad_norm': 0.40302643179893494, 'learning_rate': 0.0001980000 15%|█▍        | 100/675 [1:33:49<7:18:34, 45.76s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1514573097229004, 'eval_runtime': 501.3015, 'eval_samples_per_second': 0.371, 'eval_steps_per_second': 0.371, 'epoch': 0.45}
+ 22%|██▏       | 150/675 [2:12:13<6:57:55, 47.76s/it]  
+{'loss': 1.057, 'grad_norm': 0.94427889585495, 'learning_rate': 0.0001968695652173913, 'epoch': 0.49}
+{'loss': 1.0689, 'grad_norm': 0.48460623621940613, 'learning_rate': 0.00019339130434782608, 'epoch': 0.54}
+{'loss': 1.073, 'grad_norm': 0.4542770981788635, 'learning_rate': 0.0001899130434782609, 'epoch': 0.58}
+{'loss': 1.0371, 'grad_norm': 0.9836730360984802, 'learning_rate': 0.00018643478260869567, 'epoch': 0.62}
+{'loss': 1.0083, 'grad_norm': 0.6646406054496765, 'learning_rate': 0.00018295652 22%|██▏       | 150/675 [2:20:29<6:57:55, 47.76s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1312854290008545, 'eval_runtime': 495.7261, 'eval_samples_per_second': 0.375, 'eval_steps_per_second': 0.375, 'epoch': 0.67}
+{'loss': 1.0489, 'grad_norm': 0.455915242433548, 'learning_rate': 0.00017947826086956524, 'epoch': 0.71}
+{'loss': 1.0338, 'grad_norm': 0.6364191770553589, 'learning_rate': 0.00017600000000000002, 'epoch': 0.76}
+ 30%|██▉       | 200/675 [2:58:10<5:55:50, 44.95s/it]  
+{'loss': 1.0366, 'grad_norm': 0.40768852829933167, 'learning_rate': 0.00017252173913043478, 'epoch': 0.8}
+{'loss': 1.0359, 'grad_norm': 0.5871556401252747, 'learning_rate': 0.00016904347826086956, 'epoch': 0.85}
+{'loss': 1.0418, 'grad_norm': 0.5993767976760864, 'learning_rate': 0.00016556521 30%|██▉       | 200/675 [3:06:25<5:55:50, 44.95s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1417587995529175, 'eval_runtime': 494.7539, 'eval_samples_per_second': 0.376, 'eval_steps_per_second': 0.376, 'epoch': 0.89}
+{'loss': 1.0595, 'grad_norm': 0.6779035329818726, 'learning_rate': 0.00016208695652173913, 'epoch': 0.94}
+{'loss': 1.0427, 'grad_norm': 0.6705031991004944, 'learning_rate': 0.0001586086956521739, 'epoch': 0.98}
+{'loss': 1.0217, 'grad_norm': 0.5811331868171692, 'learning_rate': 0.00015513043478260872, 'epoch': 1.02}
+{'loss': 1.036, 'grad_norm': 0.7846717834472656, 'learning_rate': 0.0001516521739130435, 'epoch': 1.07}
+{'loss': 1.0293, 'grad_norm': 0.8195101618766785, 'learning_rate': 0.00014817391304347829, 'epoch': 1.11}
+ 37%|███▋      | 250/675 [3:50:18<4:53:14, 41.40s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1500048637390137, 'eval_runtime': 494.7886, 'eval_samples_per_second': 0.376, 'eval_steps_per_second': 0.376, 'epoch': 1.11}
+{'loss': 1.0433, 'grad_norm': 0.7290286421775818, 'learning_rate': 0.00014469565217391304, 'epoch': 1.16}
+{'loss': 1.0242, 'grad_norm': 1.0579501390457153, 'learning_rate': 0.00014121739130434782, 'epoch': 1.2}
+{'loss': 1.0622, 'grad_norm': 0.8327373266220093, 'learning_rate': 0.0001377391304347826, 'epoch': 1.25}
+{'loss': 1.0484, 'grad_norm': 0.8810057640075684, 'learning_rate': 0.0001342608695652174, 'epoch': 1.29}
+{'loss': 1.0361, 'grad_norm': 0.9269272685050964, 'learning_rate': 0.00013078260869565217, 'epoch': 1.33}
+ 44%|████▍     | 300/675 [4:33:05<4:20:05, 41.62s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.150187373161316, 'eval_runtime': 494.5383, 'eval_samples_per_second': 0.376, 'eval_steps_per_second': 0.376, 'epoch': 1.33}
+{'loss': 1.0448, 'grad_norm': 0.7255858778953552, 'learning_rate': 0.00012730434782608696, 'epoch': 1.38}
+{'loss': 1.056, 'grad_norm': 0.7279195785522461, 'learning_rate': 0.00012382608695652174, 'epoch': 1.42}
+{'loss': 1.0021, 'grad_norm': 0.9102184772491455, 'learning_rate': 0.00012034782608695652, 'epoch': 1.47}
+{'loss': 1.0192, 'grad_norm': 0.6023561954498291, 'learning_rate': 0.00011686956521739132, 'epoch': 1.51}
+{'loss': 1.008, 'grad_norm': 0.8103532195091248, 'learning_rate': 0.0001133913043478261, 'epoch': 1.56}
+ 52%|█████▏    | 350/675 [5:16:00<3:46:06, 41.74s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1429052352905273, 'eval_runtime': 496.1058, 'eval_samples_per_second': 0.375, 'eval_steps_per_second': 0.375, 'epoch': 1.56}
+{'loss': 1.0384, 'grad_norm': 0.6100583076477051, 'learning_rate': 0.00010991304347826088, 'epoch': 1.6}
+ 59%|█████▉    | 400/675 [5:50:37<3:12:19, 41.96s/it]  
+{'loss': 1.0002, 'grad_norm': 0.9929141402244568, 'learning_rate': 0.00010643478260869565, 'epoch': 1.65}
+{'loss': 1.0153, 'grad_norm': 0.8266071677207947, 'learning_rate': 0.00010295652173913044, 'epoch': 1.69}
+{'loss': 1.0115, 'grad_norm': 1.1214561462402344, 'learning_rate': 9.947826086956522e-05, 'epoch': 1.74}
+{'loss': 1.0102, 'grad_norm': 1.1170246601104736, 'learning_rate': 9.6e-05, 'epo 59%|█████▉    | 400/675 [5:58:53<3:12:19, 41.96s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1306226253509521, 'eval_runtime': 495.5846, 'eval_samples_per_second': 0.375, 'eval_steps_per_second': 0.375, 'epoch': 1.78}
+ 67%|██████▋   | 450/675 [6:32:56<1:59:25, 31.85s/it]  
+{'loss': 1.0301, 'grad_norm': 0.8376195430755615, 'learning_rate': 9.25217391304348e-05, 'epoch': 1.82}
+{'loss': 1.0147, 'grad_norm': 0.8215062618255615, 'learning_rate': 8.904347826086957e-05, 'epoch': 1.87}
+{'loss': 1.035, 'grad_norm': 0.7891777157783508, 'learning_rate': 8.556521739130435e-05, 'epoch': 1.91}
+{'loss': 1.0252, 'grad_norm': 0.7645251750946045, 'learning_rate': 8.208695652173913e-05, 'epoch': 1.96}
+{'loss': 1.0361, 'grad_norm': 1.7955482006072998, 'learning_rate': 7.86086956521 67%|██████▋   | 450/675 [6:41:13<1:59:25, 31.85s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1335489749908447, 'eval_runtime': 496.2156, 'eval_samples_per_second': 0.375, 'eval_steps_per_second': 0.375, 'epoch': 2.0}
+{'loss': 1.0034, 'grad_norm': 1.532352328300476, 'learning_rate': 7.51304347826087e-05, 'epoch': 2.04}
+ 74%|███████▍  | 500/675 [7:15:51<2:01:52, 41.78s/it]  
+{'loss': 0.9914, 'grad_norm': 1.1739094257354736, 'learning_rate': 7.165217391304348e-05, 'epoch': 2.09}
+{'loss': 0.9777, 'grad_norm': 0.9424097537994385, 'learning_rate': 6.817391304347827e-05, 'epoch': 2.13}
+{'loss': 1.0033, 'grad_norm': 0.7827523350715637, 'learning_rate': 6.469565217391305e-05, 'epoch': 2.18}
+{'loss': 1.0013, 'grad_norm': 1.2734038829803467, 'learning_rate': 6.12173913043 74%|███████▍  | 500/675 [7:24:08<2:01:52, 41.78s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1293768882751465, 'eval_runtime': 496.5204, 'eval_samples_per_second': 0.375, 'eval_steps_per_second': 0.375, 'epoch': 2.22}
+{'loss': 1.0176, 'grad_norm': 0.9160686135292053, 'learning_rate': 5.773913043478261e-05, 'epoch': 2.27}
+{'loss': 0.963, 'grad_norm': 1.0040559768676758, 'learning_rate': 5.42608695652174e-05, 'epoch': 2.31}
+{'loss': 0.9695, 'grad_norm': 0.9198096990585327, 'learning_rate': 5.078260869565218e-05, 'epoch': 2.36}
+{'loss': 0.992, 'grad_norm': 0.7921128273010254, 'learning_rate': 4.7304347826086956e-05, 'epoch': 2.4}
+{'loss': 0.9872, 'grad_norm': 2.1362743377685547, 'learning_rate': 4.382608695652174e-05, 'epoch': 2.45}
+ 81%|████████▏ | 550/675 [8:07:08<1:26:41, 41.61s/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.126204252243042, 'eval_runtime': 497.1872, 'eval_samples_per_second': 0.374, 'eval_steps_per_second': 0.374, 'epoch': 2.45}
+ 89%|████████▉ | 600/675 [8:41:39<51:32, 41.24s/it]   
+{'loss': 1.0036, 'grad_norm': 0.7827986478805542, 'learning_rate': 4.034782608695652e-05, 'epoch': 2.49}
+{'loss': 0.9752, 'grad_norm': 0.794833779335022, 'learning_rate': 3.6869565217391305e-05, 'epoch': 2.54}
+{'loss': 0.982, 'grad_norm': 0.868048906326294, 'learning_rate': 3.339130434782609e-05, 'epoch': 2.58}
+{'loss': 1.0019, 'grad_norm': 0.8815147876739502, 'learning_rate': 2.991304347826087e-05, 'epoch': 2.62}
+{'loss': 0.9997, 'grad_norm': 0.9623611569404602, 'learning_rate': 2.64347826086 89%|████████▉ | 600/675 [8:49:55<51:32, 41.24s/i/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+{'eval_loss': 1.1297454833984375, 'eval_runtime': 495.8969, 'eval_samples_per_second': 0.375, 'eval_steps_per_second': 0.375, 'epoch': 2.67}
+{'loss': 0.9954, 'grad_norm': 0.8326092958450317, 'learning_rate': 2.2956521739130433e-05, 'epoch': 2.71}
+{'loss': 0.9877, 'grad_norm': 0.983832061290741, 'learning_rate': 1.9478260869565216e-05, 'epoch': 2.76}
+ 96%|█████████▋| 650/675 [9:24:27<17:09, 41.18s/it]   
+{'loss': 0.9831, 'grad_norm': 1.376827359199524, 'learning_rate': 1.6000000000000003e-05, 'epoch': 2.8}
+{'loss': 1.0057, 'grad_norm': 0.9621990919113159, 'learning_rate': 1.2521739130434784e-05, 'epoch': 2.85}
+{'loss': 0.9695, 'grad_norm': 1.7392027378082275, 'learning_rate': 9.04347826086 96%|█████████▋| 650/675 [9:32:43<17:09, 41.18s/i/usr/local/lib/python3.10/dist-packages/transformers/tokenization_utils_base.py:2779: UserWarning: `max_length` is ignored when `padding`=`True` and there is no truncation strategy. To pad to max length, use `padding='max_length'`.
+  warnings.warn(
+/usr/local/lib/python3.10/dist-packages/torch/_dynamo/eval_frame.py:1044: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. Starting in PyTorch 2.9, calling checkpoint without use_reentrant will raise an exception. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/usr/local/lib/python3.10/dist-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+100%|██████████| 675/675 [9:49:29<00:00, 52.40s/it]   
+{'eval_loss': 1.1265381574630737, 'eval_runtime': 495.3549, 'eval_samples_per_second': 0.375, 'eval_steps_per_second': 0.375, 'epoch': 2.89}
+{'loss': 0.9892, 'grad_norm': 1.1558905839920044, 'learning_rate': 5.565217391304348e-06, 'epoch': 2.94}
+{'loss': 0.9928, 'grad_norm': 0.8034245371818542, 'learning_rate': 2.0869565217391305e-06, 'epoch': 2.98}
+{'train_runtime': 35369.6214, 'train_samples_per_second': 0.152, 'train_steps_per_second': 0.019, 'train_loss': 1.068510210249159, 'epoch': 3.0}
+
+Saving model and processor...
+Training complete! Model saved to /workspace/output/qwen_qlora
+Step	Train Loss	Eval Loss
+10	1.7835	None
+20	1.7512	None
+30	1.5649	None
+40	1.4106	None
+50	1.365	1.3392605781555176
+60	1.2692	None
+70	1.1746	None
+80	1.143	None
+90	1.1119	None
+100	1.0925	1.1514573097229004
+110	1.057	None
+120	1.0689	None
+130	1.073	None
+140	1.0371	None
+150	1.0083	1.1312854290008545
+160	1.0489	None
+170	1.0338	None
+180	1.0366	None
+190	1.0359	None
+200	1.0418	1.1417587995529175
+210	1.0595	None
+220	1.0427	None
+230	1.0217	None
+240	1.036	None
+250	1.0293	1.1500048637390137
+260	1.0433	None
+270	1.0242	None
+280	1.0622	None
+290	1.0484	None
+300	1.0361	1.150187373161316
+310	1.0448	None
+320	1.056	None
+330	1.0021	None
+340	1.0192	None
+350	1.008	1.1429052352905273
+360	1.0384	None
+370	1.0002	None
+380	1.0153	None
+390	1.0115	None
+400	1.0102	1.1306226253509521
+410	1.0301	None
+420	1.0147	None
+430	1.035	None
+440	1.0252	None
+450	1.0361	1.1335489749908447
+460	1.0034	None
+470	0.9914	None
+480	0.9777	None
+490	1.0033	None
+500	1.0013	1.1293768882751465
+510	1.0176	None
+520	0.963	None
+530	0.9695	None
+540	0.992	None
+550	0.9872	1.126204252243042
+560	1.0036	None
+570	0.9752	None
+580	0.982	None
+590	1.0019	None
+600	0.9997	1.1297454833984375
+610	0.9954	None
+620	0.9877	None
+630	0.9831	None
+640	1.0057	None
+650	0.9695	1.1265381574630737
+660	0.9892	None
+670	0.9928	None
+[W1202 04:51:14.795573836 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+
