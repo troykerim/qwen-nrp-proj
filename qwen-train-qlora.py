@@ -180,6 +180,7 @@ print(f"{'='*70}")
 
 print("Configuring TrainingArguments...")
 
+# Training Parameters
 training_args = TrainingArguments(
     output_dir=OUTPUT_DIR,
     num_train_epochs=3,  # originally 5
@@ -190,8 +191,8 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=8,
 
     # Learning rate
-    learning_rate=2e-4,
-    warmup_steps=100,
+    learning_rate=1.5e-4,     # 2e-4
+    warmup_steps=50,         # 100, increments of 50
 
     # Evaluation
     eval_strategy="steps",
@@ -210,8 +211,9 @@ training_args = TrainingArguments(
 
     # Optimization
     gradient_checkpointing=False,   # Was original set to true, but was sending a Warning in the last cell
-    # optim="adamw_8bit",  # 8-bit optimizer, use with LoRA
-    optim="adamw_torch",  # Should be ok with QLoRA?
+    optim="adamw_8bit",     
+    # optim="adamw_torch",  # Should be ok with QLoRA?
+    max_grad_norm=0.3,    # Gradient clipping to prevent exploding gradients
 
     # Memory
     dataloader_pin_memory=True,
