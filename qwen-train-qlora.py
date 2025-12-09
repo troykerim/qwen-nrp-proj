@@ -12,7 +12,7 @@ MODEL_PATH = "/workspace/models/Qwen2.5-VL-7B-Instruct"
 DATASET_DIR = "/workspace/data/dataset"
 TRAINING_DATA = "/workspace/data/train.jsonl"
 VAL_DATA = "/workspace/data/valid.jsonl"
-OUTPUT_DIR = "/workspace/output/qwen_qlora"
+OUTPUT_DIR = "/workspace/output/qwen_qlora2"  # Original was "/workspace/output/qwen_qlora"
 
 class WasteDetectionDataset(torch.utils.data.Dataset):
     """Custom dataset that doesn't use Arrow/Datasets library"""
