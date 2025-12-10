@@ -131,7 +131,7 @@ model = prepare_model_for_kbit_training(model)
 
 # LoRA configuration
 lora_config = LoraConfig(
-    r=8,
+    r=16,                    # Lora rank, 8
     lora_alpha=16,
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],     # target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
     lora_dropout=0.05,
@@ -191,7 +191,7 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=8,
 
     # Learning rate
-    learning_rate=1e-4,     # 2e-4, 1.5e-4
+    learning_rate=2e-4,     # 2e-4, 1.5e-4, 1e-4
     warmup_steps=50,         # 100, increments of 50
 
     # Evaluation
