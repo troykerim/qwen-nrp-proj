@@ -191,7 +191,7 @@ training_args = TrainingArguments(
     gradient_accumulation_steps=8,
 
     # Learning rate
-    learning_rate=2e-4,     # 2e-4, 1.5e-4, 1e-4
+    learning_rate=3e-4,     # 2e-4, 1.5e-4, 1e-4
     warmup_steps=50,         # 100, increments of 50
 
     # Evaluation
