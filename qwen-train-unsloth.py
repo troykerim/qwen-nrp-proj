@@ -8,10 +8,6 @@ from unsloth import FastVisionModel
 from trl import SFTTrainer, SFTConfig
 from transformers import AutoProcessor
 
-# ============================================================
-# PATHS (MATCH qwen7b-12-15.txt)
-# ============================================================
-
 MODEL_PATH    = "/workspace/models/Qwen2.5-VL-7B-Instruct"
 DATASET_DIR   = "/workspace/data/dataset"
 TRAINING_DATA = "/workspace/data/train.jsonl"
@@ -25,10 +21,6 @@ print("Model:", os.path.exists(MODEL_PATH))
 print("Dataset:", os.path.exists(DATASET_DIR))
 print("Train JSONL:", os.path.exists(TRAINING_DATA))
 print("Valid JSONL:", os.path.exists(VAL_DATA))
-
-# ============================================================
-# LOAD MODEL (Unsloth QLoRA)
-# ============================================================
 
 model, tokenizer = FastVisionModel.from_pretrained(
     MODEL_PATH,
@@ -57,10 +49,6 @@ processor = AutoProcessor.from_pretrained(
 
 FastVisionModel.for_training(model)
 
-# ============================================================
-# DATA LOADING (JSONL + DATASET_DIR)
-# ============================================================
-
 def load_jsonl_with_images(jsonl_path, dataset_dir):
     data = []
     with open(jsonl_path, "r") as f:
@@ -81,10 +69,6 @@ val_dataset   = load_jsonl_with_images(VAL_DATA, DATASET_DIR)
 
 print(f"Train samples: {len(train_dataset)}")
 print(f"Valid samples: {len(val_dataset)}")
-
-# ============================================================
-# CUSTOM COLLATOR (assistant-only loss)
-# ============================================================
 
 class WasteDetectionUnslothCollator:
     def __init__(self, processor, max_length=2048):
@@ -145,10 +129,7 @@ class WasteDetectionUnslothCollator:
         batch["labels"] = labels
         return batch
 
-# ============================================================
-# TRAINER
-# ============================================================
-
+# Training Parameters
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
@@ -176,10 +157,6 @@ trainer = SFTTrainer(
     ),
 )
 
-# ============================================================
-# TRAIN
-# ============================================================
-
 print("Starting training...\n")
 trainer.train()
 
@@ -188,10 +165,7 @@ tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"Training complete. Model saved to {OUTPUT_DIR}")
 
-# ============================================================
-# GPU MEMORY STATS
-# ============================================================
-
+# MEMORY STATS
 if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
     print("\n" + "="*70)
