@@ -132,7 +132,7 @@ class WasteDetectionUnslothCollator:
 # Training Parameters
 trainer = SFTTrainer(
     model=model,
-    tokenizer=tokenizer,
+    # tokenizer=tokenizer,
     data_collator=WasteDetectionUnslothCollator(processor),
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
@@ -149,7 +149,7 @@ trainer = SFTTrainer(
         optim="adamw_8bit",
         weight_decay=0.01,
         remove_unused_columns=False,
-        dataset_text_field="",
+        dataset_text_field=None,      # dataset_text_field="",
         dataset_kwargs={"skip_prepare_dataset": True},
         max_length=2048,
         report_to="none",
