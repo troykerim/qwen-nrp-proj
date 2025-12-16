@@ -116,7 +116,8 @@ class WasteDetectionUnslothCollator:
                 continue
 
             asst_tokens = self.processor.tokenizer.encode(
-                assistant_msg, add_special_tokens=False
+                assistant_msg,
+                add_special_tokens=False
             )
 
             seq_len = batch["attention_mask"][idx].sum().item()
@@ -129,10 +130,9 @@ class WasteDetectionUnslothCollator:
         batch["labels"] = labels
         return batch
 
-# Training Parameters
 trainer = SFTTrainer(
     model=model,
-    # tokenizer=tokenizer,
+    tokenizer=tokenizer,
     data_collator=WasteDetectionUnslothCollator(processor),
     train_dataset=train_dataset,
     eval_dataset=val_dataset,
@@ -149,7 +149,8 @@ trainer = SFTTrainer(
         optim="adamw_8bit",
         weight_decay=0.01,
         remove_unused_columns=False,
-        dataset_text_field=None,      # dataset_text_field="",
+        dataset_text_field=None,
+        packing=False,
         dataset_kwargs={"skip_prepare_dataset": True},
         max_length=2048,
         report_to="none",
@@ -165,7 +166,6 @@ tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"Training complete. Model saved to {OUTPUT_DIR}")
 
-# MEMORY STATS
 if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
     print("\n" + "="*70)
