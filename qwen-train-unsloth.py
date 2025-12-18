@@ -1,4 +1,12 @@
 import os
+
+# Disable TorchInductor / Triton compilation (REQUIRED for Nautilus)
+os.environ["TORCH_COMPILE_DISABLE"] = "1"
+os.environ["TORCHINDUCTOR_DISABLE"] = "1"
+os.environ["TORCHDYNAMO_DISABLE"] = "1"
+os.environ["TRITON_DISABLE_LINE_INFO"] = "1"
+
+# Memory safety
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 import json
@@ -9,6 +17,7 @@ from unsloth.trainer import UnslothVisionDataCollator
 from trl import SFTTrainer, SFTConfig
 from transformers import AutoProcessor
 
+# Nautilus paths (UNCHANGED)
 MODEL_PATH    = "/workspace/models/Qwen2.5-VL-7B-Instruct"
 DATASET_DIR   = "/workspace/data/dataset"
 TRAIN_JSONL   = "/workspace/data/train.jsonl"
@@ -29,7 +38,7 @@ def load_jsonl(path):
         for line in f:
             item = json.loads(line)
 
-            # Fix relative image paths
+            # Fix relative image paths using DATASET_DIR
             for msg in item.get("messages", []):
                 if msg.get("role") == "user":
                     for content in msg.get("content", []):
@@ -47,7 +56,7 @@ valid_data = load_jsonl(VALID_JSONL)
 print(f"Train samples: {len(train_data)}")
 print(f"Valid samples: {len(valid_data)}")
 
-# Load model
+# Load model with Unsloth
 model, tokenizer = FastVisionModel.from_pretrained(
     MODEL_PATH,
     load_in_4bit=True,
@@ -75,7 +84,6 @@ processor = AutoProcessor.from_pretrained(
 
 FastVisionModel.for_training(model)
 
-# Trainer
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
@@ -113,8 +121,9 @@ print(f"Training complete. Model saved to {OUTPUT_DIR}")
 
 if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
-    print("\nFINAL GPU MEMORY STATS")
+    print("FINAL GPU MEMORY STATS")
     print(f"GPU: {gpu.name}")
     print(f"Max reserved:  {torch.cuda.max_memory_reserved() / 1024**3:.2f} GB")
     print(f"Max allocated: {torch.cuda.max_memory_allocated() / 1024**3:.2f} GB")
+
 
