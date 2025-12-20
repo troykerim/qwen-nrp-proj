@@ -117,7 +117,7 @@ trainer.train()
 trainer.save_model(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
-print(f"Training complete. Model saved to {OUTPUT_DIR}")
+print(f"Training complete. Model snaved to {OUTPUT_DIR}")
 
 if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
@@ -125,5 +125,3 @@ if torch.cuda.is_available():
     print(f"GPU: {gpu.name}")
     print(f"Max reserved:  {torch.cuda.max_memory_reserved() / 1024**3:.2f} GB")
     print(f"Max allocated: {torch.cuda.max_memory_allocated() / 1024**3:.2f} GB")
-
-
