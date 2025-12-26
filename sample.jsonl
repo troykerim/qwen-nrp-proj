@@ -1,0 +1,14 @@
+Pulled from Valid JSONL
+
+Each text must be on a single line
+
+Template for Jam Causing material
+{"messages": [{"role": "system", "content": "You are an assistant that detects jam causing objects in images. The possible jam causing objects are: fabrics, rigid-plastic, non-recyclables, large-plastic-films, unopened-plastic-bags, metal, wrappables, wood."}, {"role": "user", "content": [{"type": "image", "image": "/workspace/data/dataset/valid/images/..."}, {"type": "text", "text": "Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax"}]}, {"role": "assistant", "content": "class-name xmin xmax ymin ymax\nclass-name xmin xmax ymin ymax\n..."}]}
+
+For the: "role", "assistant", "content" at the very end of the {} is where the bounding box coords go with lable name
+
+
+Example from previous valid file:
+{"messages": [{"role": "system", "content": "You are an assistant that detects waste objects in images. The possible waste categories are: Glass-A, Green waste-A, Metal, Organics-A, Organics-B-NOT, Organics-E, Others, Paper-A, Paper-B, Paper-D, Plastic-A, Plastic-B, Plastic-C, Plastic-D, Plastic-E, Plastic-G, Wood."}, {"role": "user", "content": [{"type": "image", "image": "/workspace/data/dataset/valid/images/-1729-9-2800000_jpg_jpg.rf.b2c5ac5b3061b6796ce42d475fa17b88.jpg"}, {"type": "text", "text": "Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax"}]}, {"role": "assistant", "content": "Paper-B 1255 1507 819 1071\nPaper-B 1092 1287 831 983\nPlastic-G 1776 1848 937 1023\nPlastic-B 1753 1801 981 1011\nPaper-D 1533 1743 527 797\nMetal 1515 1563 240 284\nPaper-A 718 868 320 398\nPaper-B 702 837 94 223\nOthers 40 502 215 455\nPaper-A 679 817 688 820\nWood-C 141 257 688 803\nPaper-A 435 501 841 963\nPaper-B 343 427 889 975\nPlastic-E 1293 1467 593 730\nMetal 1244 1303 195 255\nPlastic-E 835 1180 463 941\nPlastic-E 945 1190 321 613\nGlass-A 338 430 164 204\nMetal 1203 1254 123 174"}]}
+
+
