@@ -2,7 +2,7 @@ import os
 import json
 import torch
 
-# Nautilus stability checks
+# Nautilus stability flags
 os.environ["TORCH_COMPILE_DISABLE"] = "1"
 os.environ["TORCHINDUCTOR_DISABLE"] = "1"
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
@@ -15,9 +15,7 @@ from trl import SFTTrainer, SFTConfig
 from transformers import AutoProcessor
 from torch.utils.data import DataLoader
 
-# Nautilus Paths
 MODEL_PATH  = "/workspace/models/Qwen2.5-VL-7B-Instruct"
-# DATASET_DIR = "/workspace/data/dataset"
 DATASET_DIR = "/workspace/data/jam-causing-material"
 TRAIN_JSONL = "/workspace/data/train.jsonl"
 VALID_JSONL = "/workspace/data/valid.jsonl"
@@ -34,13 +32,11 @@ print("Valid JSONL:", os.path.exists(VALID_JSONL))
 print("Test JSONL:", os.path.exists(TEST_JSONL))
 print()
 
-
 def load_jsonl(path):
     data = []
     with open(path, "r") as f:
         for line in f:
             item = json.loads(line)
-
             for msg in item.get("messages", []):
                 if msg.get("role") == "user":
                     for content in msg.get("content", []):
@@ -48,7 +44,6 @@ def load_jsonl(path):
                             img = content["image"]
                             if not img.startswith("/"):
                                 content["image"] = os.path.join(DATASET_DIR, img)
-
             data.append(item)
     return data
 
@@ -60,7 +55,6 @@ print(f"Train samples: {len(train_data)}")
 print(f"Valid samples: {len(valid_data)}")
 print(f"Test samples : {len(test_data)}\n")
 
-# Load model with Unsloth
 model, tokenizer = FastVisionModel.from_pretrained(
     MODEL_PATH,
     load_in_4bit=True,
@@ -88,7 +82,6 @@ processor = AutoProcessor.from_pretrained(
 
 FastVisionModel.for_training(model)
 
-# Training block on train & valid sets
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
@@ -115,6 +108,7 @@ trainer = SFTTrainer(
         seed=42,
     ),
 )
+
 print("Starting training...\n")
 trainer.train()
 
@@ -123,7 +117,6 @@ tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"\nTraining complete. Model saved to {OUTPUT_DIR}\n")
 
-# ===================== TEST PHASE =============================
 def extract_assistant_text(text):
     if "<|im_start|>assistant" in text:
         return text.split("<|im_start|>assistant")[-1].strip()
@@ -154,13 +147,13 @@ print("Running evaluation on test set...")
 with torch.no_grad():
     for idx, batch in enumerate(test_dataloader):
         input_ids = batch["input_ids"].to(model.device)
-        pixel_values = batch.get("pixel_values", None)
-        if pixel_values is not None:
-            pixel_values = pixel_values.to(model.device)
+        pixel_values = batch["pixel_values"].to(model.device)
+        image_grid_thw = batch["image_grid_thw"].to(model.device)
 
         outputs = model.generate(
             input_ids=input_ids,
             pixel_values=pixel_values,
+            image_grid_thw=image_grid_thw,
             max_new_tokens=256,
             do_sample=False,
         )
@@ -168,7 +161,6 @@ with torch.no_grad():
         decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
         prediction = extract_assistant_text(decoded)
 
-        # Ground truth
         gt_answer = ""
         for m in test_data[idx]["messages"]:
             if m["role"] == "assistant":
@@ -181,7 +173,6 @@ with torch.no_grad():
             "ground_truth": gt_answer,
         })
 
-        # Show a few samples in logs
         if idx < 5:
             print(f"\nSample {idx}")
             print("PREDICTION:")
@@ -189,18 +180,16 @@ with torch.no_grad():
             print("GROUND TRUTH:")
             print(gt_answer)
 
-
-# Save test results
 results_path = os.path.join(OUTPUT_DIR, "test_results.json")
 with open(results_path, "w") as f:
     json.dump(results, f, indent=2)
 
 print(f"\nTest results saved to {results_path}")
 
-# GPU memory stats
 if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
     print("\nFINAL GPU MEMORY STATS")
     print(f"GPU: {gpu.name}")
     print(f"Max reserved:  {torch.cuda.max_memory_reserved() / 1024**3:.2f} GB")
     print(f"Max allocated: {torch.cuda.max_memory_allocated() / 1024**3:.2f} GB")
+
