@@ -1,0 +1,248 @@
++ python -V
+Python 3.10.12
++ nvidia-smi
+Wed Dec 31 17:02:05 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.105.08             Driver Version: 580.105.08     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A10                     On  |   00000000:E1:00.0 Off |                    0 |
+|  0%   29C    P8             23W /  150W |       3MiB /  23028MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
++ echo '[INFO] Checking Qwen model in PVC...'
++ ls -al /workspace/models/Qwen2.5-VL-7B-Instruct
+[INFO] Checking Qwen model in PVC...
+total 16207052
+drwxr-xr-x 2 root root       4096 Nov  8 22:11 .
+drwxr-xr-x 4 root root         54 Nov  8 21:48 ..
+-rw-rw-r-- 1 1000 1000      18574 Nov  8 21:57 README.md
+-rw-rw-r-- 1 1000 1000       1050 Nov  8 21:57 chat_template.json
+-rw-rw-r-- 1 1000 1000       1374 Nov  8 21:57 config.json
+-rw-rw-r-- 1 1000 1000        216 Nov  8 21:57 generation_config.json
+-rw-rw-r-- 1 1000 1000    1671839 Nov  8 21:57 merges.txt
+-rw-rw-r-- 1 1000 1000 3900233256 Nov  8 21:58 model-00001-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864726320 Nov  8 22:00 model-00002-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864726424 Nov  8 22:01 model-00003-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864733680 Nov  8 22:03 model-00004-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 1089994880 Nov  8 22:03 model-00005-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000      57619 Nov  8 22:03 model.safetensors.index.json
+-rw-rw-r-- 1 1000 1000        350 Nov  8 22:03 preprocessor_config.json
+-rw-rw-r-- 1 1000 1000    7031645 Nov  8 22:03 tokenizer.json
+-rw-rw-r-- 1 1000 1000       5702 Nov  8 22:03 tokenizer_config.json
+-rw-rw-r-- 1 1000 1000    2776833 Nov  8 22:03 vocab.json
+[INFO] Dataset contents:
++ echo '[INFO] Dataset contents:'
++ ls -al /workspace/data
+total 3976
+drwxr-xr-x  7 root root     215 Dec 31 02:46 .
+drwxr-xr-x 12 root root    4096 Dec 30 23:26 ..
+drwxr-xr-x  4 root root      32 Nov  9 23:28 dataset
+drwxr-xr-x  2 root root   86016 Oct 13 18:51 images
+drwxr-xr-x  5 root root      44 Dec 30 22:46 jam-causing-material
+drwxr-xr-x  2 root root   86016 Oct 13 18:51 labels
+-rw-rw-r--  1 1000 1000     230 Oct 13 23:12 maica_internvl_sft.json
+-rw-rw-r--  1 1000 1000 1622935 Oct 13 23:12 maica_internvl_sft.jsonl
+-rw-rw-r--  1 1000 1000  214015 Dec 31 02:46 test.jsonl
+drwxr-xr-x  4 root root      34 Oct 29 04:25 test_images
+-rw-rw-r--  1 1000 1000 1778569 Dec 31 02:46 train.jsonl
+-rw-rw-r--  1 1000 1000  212421 Dec 31 02:46 valid.jsonl
+[INFO] Starting QLoRA fine-tuning...
++ echo '[INFO] Starting QLoRA fine-tuning...'
++ python /workspace/qwen-train-unsloth.py
+/usr/local/lib/python3.10/dist-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+Path check:
+Model: True
+Dataset: True
+Train JSONL: True
+Valid JSONL: True
+Test JSONL: True
+
+Train samples: 2683
+Valid samples: 322
+Test samples : 322
+
+==((====))==  Unsloth 2025.12.5: Fast Qwen2_5_Vl patching. Transformers: 4.57.1.
+   \\   /|    NVIDIA A10. Num GPUs = 1. Max memory: 22.058 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.9.1+cu128. CUDA: 8.6. CUDA Toolkit: 12.8. Triton: 3.5.1
+\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.33.post2. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+Loading checkpoint shards: 100%|██████████| 5/5 [59:26<00:00, 713.33s/it]
+The image processor of type `Qwen2VLImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. Note that this behavior will be extended to all models in a future release.
+Unsloth: Dropout = 0 is supported for fast patching. You are using dropout = 0.05.
+Unsloth will patch all other layers, except LoRA matrices, causing a performance hit.
+The model is already on multiple devices. Skipping the move to device specified in `args`.
+==((====))==  Unsloth - 2x faster free finetuning | Num GPUs used = 1
+   \\   /|    Num examples = 2,683 | Num Epochs = 3 | Total steps = 1,008
+O^O/ \_/ \    Batch size per device = 1 | Gradient accumulation steps = 8
+\        /    Data Parallel GPUs = 1 | Total batch size (1 x 8 x 1) = 8
+ "-____-"     Trainable parameters = 25,760,768 of 8,317,927,424 (0.31% trained)
+Unsloth: Model does not have a default image size - using 512
+Starting training...
+
+ 68%|█████�Unsloth: Will smartly offload gradients to save VRAM!
+{'loss': 8.6209, 'grad_norm': 13.623373031616211, 'learning_rate': 3.6e-05, 'epoch': 0.03}
+{'loss': 4.7237, 'grad_norm': 2.309297561645508, 'learning_rate': 7.6e-05, 'epoch': 0.06}
+{'loss': 2.1551, 'grad_norm': 1.781980037689209, 'learning_rate': 0.000116, 'epoch': 0.09}
+{'loss': 0.6362, 'grad_norm': 0.3161766827106476, 'learning_rate': 0.00015600000000000002, 'epoch': 0.12}
+{'loss': 0.3669, 'grad_norm': 0.3449932634830475, 'learning_rate': 0.000196, 'epoch': 0.15}
+{'loss': 0.3216, 'grad_norm': 0.22983616590499878, 'learning_rate': 0.00019812108559498956, 'epoch': 0.18}
+{'loss': 0.2987, 'grad_norm': 0.24014654755592346, 'learning_rate': 0.00019603340292275576, 'epoch': 0.21}
+{'loss': 0.3142, 'grad_norm': 0.17558330297470093, 'learning_rate': 0.00019394572025052193, 'epoch': 0.24}
+{'loss': 0.3482, 'grad_norm': 0.18314899504184723, 'learning_rate': 0.0001918580375782881, 'epoch': 0.27}
+{'loss': 0.3261, 'grad_norm': 0.21256834268569946, 'learning_rate': 0.00018977035490605427, 'epoch': 0.3}
+{'loss': 0.3273, 'grad_norm': 0.20523597300052643, 'learning_rate': 0.00018768267223382047, 'epoch': 0.33}
+{'loss': 0.3205, 'grad_norm': 0.1742790937423706, 'learning_rate': 0.00018559498956158664, 'epoch': 0.36}
+{'loss': 0.3172, 'grad_norm': 0.21628043055534363, 'learning_rate': 0.00018350730688935281, 'epoch': 0.39}
+{'loss': 0.3424, 'grad_norm': 0.16722209751605988, 'learning_rate': 0.000181419624217119, 'epoch': 0.42}
+{'loss': 0.3202, 'grad_norm': 0.15504978597164154, 'learning_rate': 0.00017933194154488518, 'epoch': 0.45}
+{'loss': 0.2761, 'grad_norm': 0.21471118927001953, 'learning_rate': 0.00017724425887265138, 'epoch': 0.48}
+{'loss': 0.3338, 'grad_norm': 0.2098313421010971, 'learning_rate': 0.00017515657620041755, 'epoch': 0.51}
+{'loss': 0.294, 'grad_norm': 0.23694871366024017, 'learning_rate': 0.00017306889352818372, 'epoch': 0.54}
+{'loss': 0.3133, 'grad_norm': 0.22270075976848602, 'learning_rate': 0.00017098121085594992, 'epoch': 0.57}
+{'loss': 0.309, 'grad_norm': 0.201083242893219, 'learning_rate': 0.0001688935281837161, 'epoch': 0.6}
+{'loss': 0.296, 'grad_norm': 0.26116570830345154, 'learning_rate': 0.00016680584551148227, 'epoch': 0.63}
+{'loss': 0.2808, 'grad_norm': 0.27126502990722656, 'learning_rate': 0.00016471816283924844, 'epoch': 0.66}
+{'loss': 0.327, 'grad_norm': 0.22677433490753174, 'learning_rate': 0.00016263048016701464, 'epoch': 0.69}
+{'loss': 0.2784, 'grad_norm': 0.23985235393047333, 'learning_rate': 0.0001605427974947808, 'epoch': 0.72}
+{'loss': 0.3155, 'grad_norm': 0.2625403106212616, 'learning_rate': 0.00015845511482254698, 'epoch': 0.75}
+{'loss': 0.2972, 'grad_norm': 0.20333009958267212, 'learning_rate': 0.00015636743215031315, 'epoch': 0.78}
+{'loss': 0.3098, 'grad_norm': 0.22731426358222961, 'learning_rate': 0.00015427974947807935, 'epoch': 0.81}
+{'loss': 0.295, 'grad_norm': 0.22468382120132446, 'learning_rate': 0.00015219206680584552, 'epoch': 0.83}
+{'loss': 0.2649, 'grad_norm': 0.2467324435710907, 'learning_rate': 0.0001501043841336117, 'epoch': 0.86}
+{'loss': 0.2836, 'grad_norm': 0.2346372902393341, 'learning_rate': 0.00014801670146137786, 'epoch': 0.89}
+{'loss': 0.2931, 'grad_norm': 0.24172696471214294, 'learning_rate': 0.00014592901878914406, 'epoch': 0.92}
+{'loss': 0.283, 'grad_norm': 0.17640407383441925, 'learning_rate': 0.00014384133611691023, 'epoch': 0.95}
+{'loss': 0.2829, 'grad_norm': 0.20539268851280212, 'learning_rate': 0.0001417536534446764, 'epoch': 0.98}
+{'loss': 0.2683, 'grad_norm': 0.3006002902984619, 'learning_rate': 0.0001396659707724426, 'epoch': 1.01}
+{'loss': 0.2812, 'grad_norm': 0.2886379659175873, 'learning_rate': 0.00013757828810020877, 'epoch': 1.04}
+{'loss': 0.2854, 'grad_norm': 0.24063923954963684, 'learning_rate': 0.00013549060542797497, 'epoch': 1.07}
+{'loss': 0.2952, 'grad_norm': 0.2518228590488434, 'learning_rate': 0.00013340292275574114, 'epoch': 1.1}
+{'loss': 0.2858, 'grad_norm': 0.20152251422405243, 'learning_rate': 0.0001313152400835073, 'epoch': 1.13}
+{'loss': 0.2938, 'grad_norm': 0.2802180051803589, 'learning_rate': 0.0001292275574112735, 'epoch': 1.16}
+{'loss': 0.2489, 'grad_norm': 0.2462209165096283, 'learning_rate': 0.00012713987473903968, 'epoch': 1.19}
+{'loss': 0.2691, 'grad_norm': 0.3052516579627991, 'learning_rate': 0.00012505219206680585, 'epoch': 1.22}
+{'loss': 0.3157, 'grad_norm': 0.34155169129371643, 'learning_rate': 0.00012296450939457203, 'epoch': 1.25}
+{'loss': 0.2764, 'grad_norm': 0.24699552357196808, 'learning_rate': 0.00012087682672233822, 'epoch': 1.28}
+{'loss': 0.2636, 'grad_norm': 0.25046852231025696, 'learning_rate': 0.0001187891440501044, 'epoch': 1.31}
+{'loss': 0.2793, 'grad_norm': 0.254073828458786, 'learning_rate': 0.00011670146137787057, 'epoch': 1.34}
+{'loss': 0.281, 'grad_norm': 0.34845486283302307, 'learning_rate': 0.00011461377870563674, 'epoch': 1.37}
+{'loss': 0.2832, 'grad_norm': 0.3252275288105011, 'learning_rate': 0.00011252609603340294, 'epoch': 1.4}
+{'loss': 0.2754, 'grad_norm': 0.36177000403404236, 'learning_rate': 0.00011043841336116911, 'epoch': 1.43}
+{'loss': 0.256, 'grad_norm': 0.23069000244140625, 'learning_rate': 0.00010835073068893529, 'epoch': 1.46}
+{'loss': 0.2589, 'grad_norm': 0.21012499928474426, 'learning_rate': 0.00010626304801670146, 'epoch': 1.49}
+{'loss': 0.2795, 'grad_norm': 0.19355134665966034, 'learning_rate': 0.00010417536534446766, 'epoch': 1.52}
+{'loss': 0.2684, 'grad_norm': 0.2649174928665161, 'learning_rate': 0.00010208768267223383, 'epoch': 1.55}
+{'loss': 0.2802, 'grad_norm': 0.27406033873558044, 'learning_rate': 0.0001, 'epoch': 1.58}
+{'loss': 0.3121, 'grad_norm': 0.29355567693710327, 'learning_rate': 9.791231732776618e-05, 'epoch': 1.61}
+{'loss': 0.2701, 'grad_norm': 0.2552126944065094, 'learning_rate': 9.582463465553236e-05, 'epoch': 1.64}
+{'loss': 0.2603, 'grad_norm': 0.2522440552711487, 'learning_rate': 9.373695198329853e-05, 'epoch': 1.67}
+{'loss': 0.2803, 'grad_norm': 0.22018766403198242, 'learning_rate': 9.164926931106472e-05, 'epoch': 1.7}
+{'loss': 0.2662, 'grad_norm': 0.25515300035476685, 'learning_rate': 8.95615866388309e-05, 'epoch': 1.73}
+{'loss': 0.2805, 'grad_norm': 0.2684527039527893, 'learning_rate': 8.747390396659709e-05, 'epoch': 1.76}
+{'loss': 0.2613, 'grad_norm': 0.2508448660373688, 'learning_rate': 8.538622129436326e-05, 'epoch': 1.79}
+{'loss': 0.2682, 'grad_norm': 0.2930680811405182, 'learning_rate': 8.329853862212944e-05, 'epoch': 1.82}
+{'loss': 0.2552, 'grad_norm': 0.33240577578544617, 'learning_rate': 8.121085594989561e-05, 'epoch': 1.85}
+{'loss': 0.2658, 'grad_norm': 0.2554183900356293, 'learning_rate': 7.91231732776618e-05, 'epoch': 1.88}
+{'loss': 0.2854, 'grad_norm': 0.2544684410095215, 'learning_rate': 7.703549060542797e-05, 'epoch': 1.91}
+{'loss': 0.2621, 'grad_norm': 0.29596376419067383, 'learning_rate': 7.494780793319416e-05, 'epoch': 1.94}
+{'loss': 0.2351, 'grad_norm': 0.2415466159582138, 'learning_rate': 7.286012526096033e-05, 'epoch': 1.97}
+{'loss': 0.2708, 'grad_norm': 0.26130592823028564, 'learning_rate': 7.077244258872651e-05, 'epoch': 2.0}
+{'loss': 0.2738, 'grad_norm': 0.30878493189811707, 'learning_rate': 6.86847599164927e-05, 'epoch': 2.02}
+{'loss': 0.2651, 'grad_norm': 0.3505690395832062, 'learning_rate': 6.659707724425888e-05, 'epoch': 2.05}
+{'loss': 0.2536, 'grad_norm': 0.28470930457115173, 'learning_rate': 6.450939457202505e-05, 'epoch': 2.08}
+{'loss': 0.2695, 'grad_norm': 0.3943174481391907, 'learning_rate': 6.242171189979124e-05, 'epoch': 2.11}
+{'loss': 0.2542, 'grad_norm': 0.2620081305503845, 'learning_rate': 6.033402922755741e-05, 'epoch': 2.14}
+{'loss': 0.2481, 'grad_norm': 0.2904733121395111, 'learning_rate': 5.824634655532359e-05, 'epoch': 2.17}
+{'loss': 0.2193, 'grad_norm': 0.32591989636421204, 'learning_rate': 5.615866388308977e-05, 'epoch': 2.2}
+{'loss': 0.2324, 'grad_norm': 0.25276076793670654, 'learning_rate': 5.4070981210855956e-05, 'epoch': 2.23}
+{'loss': 0.2526, 'grad_norm': 0.2218586802482605, 'learning_rate': 5.198329853862213e-05, 'epoch': 2.26}
+{'loss': 0.2539, 'grad_norm': 0.2693193554878235, 'learning_rate': 4.989561586638831e-05, 'epoch': 2.29}
+100%|██████████| 1008/1008 [1:59:32<00:00,  7.12s/it]
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+{'loss': 0.2564, 'grad_norm': 0.3823401629924774, 'learning_rate': 4.780793319415449e-05, 'epoch': 2.32}
+{'loss': 0.2316, 'grad_norm': 0.2814124524593353, 'learning_rate': 4.572025052192067e-05, 'epoch': 2.35}
+{'loss': 0.2469, 'grad_norm': 0.27821773290634155, 'learning_rate': 4.363256784968685e-05, 'epoch': 2.38}
+{'loss': 0.2579, 'grad_norm': 0.33832207322120667, 'learning_rate': 4.154488517745303e-05, 'epoch': 2.41}
+{'loss': 0.247, 'grad_norm': 0.3438567519187927, 'learning_rate': 3.945720250521921e-05, 'epoch': 2.44}
+{'loss': 0.266, 'grad_norm': 0.3198287785053253, 'learning_rate': 3.736951983298539e-05, 'epoch': 2.47}
+{'loss': 0.2392, 'grad_norm': 0.31066977977752686, 'learning_rate': 3.5281837160751566e-05, 'epoch': 2.5}
+{'loss': 0.2403, 'grad_norm': 0.31572356820106506, 'learning_rate': 3.319415448851775e-05, 'epoch': 2.53}
+Traceback (most recent call last):
+  File "/workspace/qwen-train-unsloth.py", line 161, in <module>
+{'loss': 0.2552, 'grad_norm': 0.3249718248844147, 'learning_rate': 3.110647181628393e-05, 'epoch': 2.56}
+{'loss': 0.2576, 'grad_norm': 0.2780909538269043, 'learning_rate': 2.9018789144050107e-05, 'epoch': 2.59}
+{'loss': 0.2405, 'grad_norm': 0.3064354360103607, 'learning_rate': 2.6931106471816288e-05, 'epoch': 2.62}
+{'loss': 0.2735, 'grad_norm': 0.4675375819206238, 'learning_rate': 2.4843423799582466e-05, 'epoch': 2.65}
+{'loss': 0.2405, 'grad_norm': 0.28779664635658264, 'learning_rate': 2.2755741127348644e-05, 'epoch': 2.68}
+{'loss': 0.266, 'grad_norm': 0.39439526200294495, 'learning_rate': 2.0668058455114826e-05, 'epoch': 2.71}
+{'loss': 0.282, 'grad_norm': 0.47412869334220886, 'learning_rate': 1.8580375782881004e-05, 'epoch': 2.74}
+{'loss': 0.2817, 'grad_norm': 0.3595045804977417, 'learning_rate': 1.6492693110647182e-05, 'epoch': 2.77}
+{'loss': 0.2561, 'grad_norm': 0.30428147315979004, 'learning_rate': 1.440501043841336e-05, 'epoch': 2.8}
+{'loss': 0.279, 'grad_norm': 0.29037290811538696, 'learning_rate': 1.2317327766179541e-05, 'epoch': 2.83}
+{'loss': 0.2727, 'grad_norm': 0.33580195903778076, 'learning_rate': 1.0229645093945721e-05, 'epoch': 2.86}
+{'loss': 0.2564, 'grad_norm': 0.27420568466186523, 'learning_rate': 8.1419624217119e-06, 'epoch': 2.89}
+{'loss': 0.2807, 'grad_norm': 0.30414116382598877, 'learning_rate': 6.05427974947808e-06, 'epoch': 2.92}
+{'loss': 0.2526, 'grad_norm': 0.30087605118751526, 'learning_rate': 3.9665970772442595e-06, 'epoch': 2.95}
+{'loss': 0.2062, 'grad_norm': 0.3653525412082672, 'learning_rate': 1.8789144050104384e-06, 'epoch': 2.98}
+{'train_runtime': 7172.7542, 'train_samples_per_second': 1.122, 'train_steps_per_second': 0.141, 'train_loss': 0.4264906699222232, 'epoch': 3.0}
+
+Training complete. Model saved to /workspace/output/qwen_unsloth
+
+Unsloth: Model does not have a default image size - using 512
+Running evaluation on test set...
+    outputs = model.generate(
+  File "/usr/local/lib/python3.10/dist-packages/peft/peft_model.py", line 2048, in generate
+    outputs = self.base_model.generate(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/unsloth/models/vision.py", line 296, in unsloth_base_fast_generate
+    output = self._old_generate(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/generation/utils.py", line 2564, in generate
+    result = decoding_method(
+  File "/usr/local/lib/python3.10/dist-packages/transformers/generation/utils.py", line 2784, in _sample
+    outputs = self(**model_inputs, return_dict=True)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/workspace/unsloth_compiled_cache/unsloth_compiled_module_qwen2_5_vl.py", line 897, in forward
+    return Qwen2_5_VLForConditionalGeneration_forward(self, input_ids, attention_mask, position_ids, past_key_values, inputs_embeds, labels, use_cache, output_attentions, output_hidden_states, pixel_values, pixel_values_videos, image_grid_thw, video_grid_thw, rope_deltas, cache_position, second_per_grid_ts, logits_to_keep, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/_dynamo/external_utils.py", line 196, in nonrecursive_disable_wrapper
+    return fn(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/utils/generic.py", line 918, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/workspace/unsloth_compiled_cache/unsloth_compiled_module_qwen2_5_vl.py", line 687, in Qwen2_5_VLForConditionalGeneration_forward
+    outputs = self.model(
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/qwen2_5_vl/modeling_qwen2_5_vl.py", line 1257, in forward
+    image_embeds = self.get_image_features(pixel_values, image_grid_thw)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/qwen2_5_vl/modeling_qwen2_5_vl.py", line 1170, in get_image_features
+    image_embeds = self.visual(pixel_values, grid_thw=image_grid_thw)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/qwen2_5_vl/modeling_qwen2_5_vl.py", line 418, in forward
+    rotary_pos_emb = self.rot_pos_emb(grid_thw)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/qwen2_5_vl/modeling_qwen2_5_vl.py", line 338, in rot_pos_emb
+    for t, h, w in grid_thw:
+TypeError: 'NoneType' object is not iterable
