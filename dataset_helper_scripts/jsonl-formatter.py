@@ -9,10 +9,10 @@ import os
 import json
 from pathlib import Path
 
-LABEL_DIR = Path("/home/troy/jam-causing-material/train/labels")
-OUTPUT_JSONL = Path("/home/troy/qwen-nrp-proj/train.jsonl")
+LABEL_DIR = Path("/home/troy/jam-causing-material/valid/labels")
+OUTPUT_JSONL = Path("/home/troy/qwen-nrp-proj/valid.jsonl")
 
-IMAGE_BASE_PATH = "/workspace/data/dataset/train/images"   # Dataset Path for Nautilus
+IMAGE_BASE_PATH = "/workspace/data/jam-causing-material/valid/images"   # Dataset Path for Nautilus
 
 SYSTEM_PROMPT = (
     "You are an assistant that detects jam causing objects in images. "

@@ -197,7 +197,6 @@ with open(results_path, "w") as f:
 
 print(f"\nTest results saved to {results_path}")
 
-
 # GPU memory stats
 if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
