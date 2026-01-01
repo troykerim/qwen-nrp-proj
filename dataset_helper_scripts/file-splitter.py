@@ -2,9 +2,9 @@ import os
 import shutil
 
 # Input and output directories
-INPUT_DIR = "/home/troy/Downloads/Jam Causing Material-dataset.voc/valid"
-IMG_OUT_DIR = "/home/troy/jam-causing-material/valid/images"
-LBL_OUT_DIR = "/home/troy/jam-causing-material/valid/labels"
+INPUT_DIR = "/home/troy/Downloads/Jam Causing Material-v2i.voc/test"
+IMG_OUT_DIR = "/home/troy/jam-causing-material-V2/test/images"
+LBL_OUT_DIR = "/home/troy/jam-causing-material-V2/test/labels"
 
 # Create output directories if they don't exist
 os.makedirs(IMG_OUT_DIR, exist_ok=True)

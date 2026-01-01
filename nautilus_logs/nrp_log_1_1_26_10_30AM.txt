@@ -1,0 +1,276 @@
++ python -V
+Python 3.10.12
++ nvidia-smi
+Wed Dec 31 20:53:32 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.105.08             Driver Version: 580.105.08     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A10                     On  |   00000000:61:00.0 Off |                    0 |
+|  0%   29C    P8             22W /  150W |       4MiB /  23028MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
++ echo '[INFO] Checking Qwen model in PVC...'
++ ls -al /workspace/models/Qwen2.5-VL-7B-Instruct
+[INFO] Checking Qwen model in PVC...
+total 16207052
+drwxr-xr-x 2 root root       4096 Nov  8 22:11 .
+drwxr-xr-x 4 root root         54 Nov  8 21:48 ..
+-rw-rw-r-- 1 1000 1000      18574 Nov  8 21:57 README.md
+-rw-rw-r-- 1 1000 1000       1050 Nov  8 21:57 chat_template.json
+-rw-rw-r-- 1 1000 1000       1374 Nov  8 21:57 config.json
+-rw-rw-r-- 1 1000 1000        216 Nov  8 21:57 generation_config.json
+-rw-rw-r-- 1 1000 1000    1671839 Nov  8 21:57 merges.txt
+-rw-rw-r-- 1 1000 1000 3900233256 Nov  8 21:58 model-00001-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864726320 Nov  8 22:00 model-00002-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864726424 Nov  8 22:01 model-00003-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 3864733680 Nov  8 22:03 model-00004-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000 1089994880 Nov  8 22:03 model-00005-of-00005.safetensors
+-rw-rw-r-- 1 1000 1000      57619 Nov  8 22:03 model.safetensors.index.json
+-rw-rw-r-- 1 1000 1000        350 Nov  8 22:03 preprocessor_config.json
+-rw-rw-r-- 1 1000 1000    7031645 Nov  8 22:03 tokenizer.json
+-rw-rw-r-- 1 1000 1000       5702 Nov  8 22:03 tokenizer_config.json
+-rw-rw-r-- 1 1000 1000    2776833 Nov  8 22:03 vocab.json
+[INFO] Dataset contents:
++ echo '[INFO] Dataset contents:'
++ ls -al /workspace/data
+total 3976
+drwxr-xr-x  7 root root     215 Dec 31 02:46 .
+drwxr-xr-x 12 root root    4096 Dec 31 20:17 ..
+drwxr-xr-x  4 root root      32 Nov  9 23:28 dataset
+drwxr-xr-x  2 root root   86016 Oct 13 18:51 images
+drwxr-xr-x  5 root root      44 Dec 30 22:46 jam-causing-material
+drwxr-xr-x  2 root root   86016 Oct 13 18:51 labels
+-rw-rw-r--  1 1000 1000     230 Oct 13 23:12 maica_internvl_sft.json
+-rw-rw-r--  1 1000 1000 1622935 Oct 13 23:12 maica_internvl_sft.jsonl
+-rw-rw-r--  1 1000 1000  214015 Dec 31 02:46 test.jsonl
+drwxr-xr-x  4 root root      34 Oct 29 04:25 test_images
+-rw-rw-r--  1 1000 1000 1778569 Dec 31 02:46 train.jsonl
+-rw-rw-r--  1 1000 1000  212421 Dec 31 02:46 valid.jsonl
++ echo '[INFO] Starting QLoRA fine-tuning...'
++ python /workspace/qwen-train-unsloth.py
+[INFO] Starting QLoRA fine-tuning...
+/usr/local/lib/python3.10/dist-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+Path check:
+Model: True
+Dataset: True
+Train JSONL: True
+Valid JSONL: True
+Test JSONL: True
+
+Train samples: 2683
+Valid samples: 322
+Test samples : 322
+
+==((====))==  Unsloth 2025.12.5: Fast Qwen2_5_Vl patching. Transformers: 4.57.1.
+   \\   /|    NVIDIA A10. Num GPUs = 1. Max memory: 22.058 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.9.1+cu128. CUDA: 8.6. CUDA Toolkit: 12.8. Triton: 3.5.1
+\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.33.post2. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+Loading checkpoint shards: 100%|██████████| 5/5 [1:00:32<00:00, 726.44s/it]
+The image processor of type `Qwen2VLImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. Note that this behavior will be extended to all models in a future release.
+Unsloth: Dropout = 0 is supported for fast patching. You are using dropout = 0.05.
+Unsloth will patch all other layers, except LoRA matrices, causing a performance hit.
+The model is already on multiple devices. Skipping the move to device specified in `args`.
+==((====))==  Unsloth - 2x faster free finetuning | Num GPUs used = 1
+   \\   /|    Num examples = 2,683 | Num Epochs = 3 | Total steps = 1,008
+O^O/ \_/ \    Batch size per device = 1 | Gradient accumulation steps = 8
+\        /    Data Parallel GPUs = 1 | Total batch size (1 x 8 x 1) = 8
+ "-____-"     Trainable parameters = 25,760,768 of 8,317,927,424 (0.31% trained)
+Unsloth: Model does not have a default image size - using 512
+Starting training...
+
+ 68%|██████▊   | 685/1008 [1:2Unsloth: Will smartly offload gradients to save VRAM!
+{'loss': 8.6227, 'grad_norm': 13.529105186462402, 'learning_rate': 3.6e-05, 'epoch': 0.03}
+{'loss': 4.7216, 'grad_norm': 2.238403081893921, 'learning_rate': 7.6e-05, 'epoch': 0.06}
+{'loss': 2.1549, 'grad_norm': 1.7562602758407593, 'learning_rate': 0.000116, 'epoch': 0.09}
+{'loss': 0.6358, 'grad_norm': 0.286494642496109, 'learning_rate': 0.00015600000000000002, 'epoch': 0.12}
+{'loss': 0.3673, 'grad_norm': 0.3441261649131775, 'learning_rate': 0.000196, 'epoch': 0.15}
+{'loss': 0.3232, 'grad_norm': 0.2128780484199524, 'learning_rate': 0.00019812108559498956, 'epoch': 0.18}
+{'loss': 0.2993, 'grad_norm': 0.268059641122818, 'learning_rate': 0.00019603340292275576, 'epoch': 0.21}
+{'loss': 0.3139, 'grad_norm': 0.1810852438211441, 'learning_rate': 0.00019394572025052193, 'epoch': 0.24}
+{'loss': 0.3481, 'grad_norm': 0.19453446567058563, 'learning_rate': 0.0001918580375782881, 'epoch': 0.27}
+{'loss': 0.3268, 'grad_norm': 0.21720485389232635, 'learning_rate': 0.00018977035490605427, 'epoch': 0.3}
+{'loss': 0.3271, 'grad_norm': 0.1983237862586975, 'learning_rate': 0.00018768267223382047, 'epoch': 0.33}
+{'loss': 0.3209, 'grad_norm': 0.18611985445022583, 'learning_rate': 0.00018559498956158664, 'epoch': 0.36}
+{'loss': 0.3168, 'grad_norm': 0.2136944830417633, 'learning_rate': 0.00018350730688935281, 'epoch': 0.39}
+{'loss': 0.3416, 'grad_norm': 0.15981225669384003, 'learning_rate': 0.000181419624217119, 'epoch': 0.42}
+{'loss': 0.3202, 'grad_norm': 0.15384499728679657, 'learning_rate': 0.00017933194154488518, 'epoch': 0.45}
+{'loss': 0.2759, 'grad_norm': 0.1979018896818161, 'learning_rate': 0.00017724425887265138, 'epoch': 0.48}
+{'loss': 0.3333, 'grad_norm': 0.22319814562797546, 'learning_rate': 0.00017515657620041755, 'epoch': 0.51}
+{'loss': 0.2957, 'grad_norm': 0.2519611716270447, 'learning_rate': 0.00017306889352818372, 'epoch': 0.54}
+{'loss': 0.3124, 'grad_norm': 0.2482483983039856, 'learning_rate': 0.00017098121085594992, 'epoch': 0.57}
+{'loss': 0.3093, 'grad_norm': 0.20911914110183716, 'learning_rate': 0.0001688935281837161, 'epoch': 0.6}
+{'loss': 0.2952, 'grad_norm': 0.2792569100856781, 'learning_rate': 0.00016680584551148227, 'epoch': 0.63}
+{'loss': 0.2798, 'grad_norm': 0.3271898925304413, 'learning_rate': 0.00016471816283924844, 'epoch': 0.66}
+{'loss': 0.3261, 'grad_norm': 0.22019241750240326, 'learning_rate': 0.00016263048016701464, 'epoch': 0.69}
+{'loss': 0.2773, 'grad_norm': 0.2874640226364136, 'learning_rate': 0.0001605427974947808, 'epoch': 0.72}
+{'loss': 0.3142, 'grad_norm': 0.3117402493953705, 'learning_rate': 0.00015845511482254698, 'epoch': 0.75}
+{'loss': 0.2969, 'grad_norm': 0.2384352833032608, 'learning_rate': 0.00015636743215031315, 'epoch': 0.78}
+{'loss': 0.31, 'grad_norm': 0.21222898364067078, 'learning_rate': 0.00015427974947807935, 'epoch': 0.81}
+{'loss': 0.2959, 'grad_norm': 0.2364215850830078, 'learning_rate': 0.00015219206680584552, 'epoch': 0.83}
+{'loss': 0.2673, 'grad_norm': 0.241938054561615, 'learning_rate': 0.0001501043841336117, 'epoch': 0.86}
+{'loss': 0.2817, 'grad_norm': 0.26665937900543213, 'learning_rate': 0.00014801670146137786, 'epoch': 0.89}
+{'loss': 0.2935, 'grad_norm': 0.19517119228839874, 'learning_rate': 0.00014592901878914406, 'epoch': 0.92}
+{'loss': 0.2829, 'grad_norm': 0.18441300094127655, 'learning_rate': 0.00014384133611691023, 'epoch': 0.95}
+{'loss': 0.2843, 'grad_norm': 0.2317904233932495, 'learning_rate': 0.0001417536534446764, 'epoch': 0.98}
+{'loss': 0.2675, 'grad_norm': 0.21978305280208588, 'learning_rate': 0.0001396659707724426, 'epoch': 1.01}
+{'loss': 0.2839, 'grad_norm': 0.278047114610672, 'learning_rate': 0.00013757828810020877, 'epoch': 1.04}
+{'loss': 0.284, 'grad_norm': 0.25994303822517395, 'learning_rate': 0.00013549060542797497, 'epoch': 1.07}
+{'loss': 0.2967, 'grad_norm': 0.3201535642147064, 'learning_rate': 0.00013340292275574114, 'epoch': 1.1}
+{'loss': 0.2852, 'grad_norm': 0.2619677186012268, 'learning_rate': 0.0001313152400835073, 'epoch': 1.13}
+{'loss': 0.2951, 'grad_norm': 0.35925111174583435, 'learning_rate': 0.0001292275574112735, 'epoch': 1.16}
+{'loss': 0.2474, 'grad_norm': 0.25067031383514404, 'learning_rate': 0.00012713987473903968, 'epoch': 1.19}
+{'loss': 0.2684, 'grad_norm': 0.27451953291893005, 'learning_rate': 0.00012505219206680585, 'epoch': 1.22}
+{'loss': 0.3164, 'grad_norm': 0.3687712550163269, 'learning_rate': 0.00012296450939457203, 'epoch': 1.25}
+{'loss': 0.2764, 'grad_norm': 0.23676246404647827, 'learning_rate': 0.00012087682672233822, 'epoch': 1.28}
+{'loss': 0.2647, 'grad_norm': 0.2743607461452484, 'learning_rate': 0.0001187891440501044, 'epoch': 1.31}
+{'loss': 0.2773, 'grad_norm': 0.21499377489089966, 'learning_rate': 0.00011670146137787057, 'epoch': 1.34}
+{'loss': 0.2801, 'grad_norm': 0.29839906096458435, 'learning_rate': 0.00011461377870563674, 'epoch': 1.37}
+{'loss': 0.2831, 'grad_norm': 0.27287471294403076, 'learning_rate': 0.00011252609603340294, 'epoch': 1.4}
+{'loss': 0.2723, 'grad_norm': 0.3343924880027771, 'learning_rate': 0.00011043841336116911, 'epoch': 1.43}
+{'loss': 0.2558, 'grad_norm': 0.4950079917907715, 'learning_rate': 0.00010835073068893529, 'epoch': 1.46}
+{'loss': 0.2636, 'grad_norm': 0.28927725553512573, 'learning_rate': 0.00010626304801670146, 'epoch': 1.49}
+{'loss': 0.28, 'grad_norm': 0.1756664663553238, 'learning_rate': 0.00010417536534446766, 'epoch': 1.52}
+{'loss': 0.2697, 'grad_norm': 0.25116926431655884, 'learning_rate': 0.00010208768267223383, 'epoch': 1.55}
+{'loss': 0.2807, 'grad_norm': 0.23914219439029694, 'learning_rate': 0.0001, 'epoch': 1.58}
+{'loss': 0.3096, 'grad_norm': 0.281523197889328, 'learning_rate': 9.791231732776618e-05, 'epoch': 1.61}
+{'loss': 0.2696, 'grad_norm': 0.28813719749450684, 'learning_rate': 9.582463465553236e-05, 'epoch': 1.64}
+{'loss': 0.2598, 'grad_norm': 0.24882322549819946, 'learning_rate': 9.373695198329853e-05, 'epoch': 1.67}
+{'loss': 0.2794, 'grad_norm': 0.24090230464935303, 'learning_rate': 9.164926931106472e-05, 'epoch': 1.7}
+{'loss': 0.2645, 'grad_norm': 0.2441554069519043, 'learning_rate': 8.95615866388309e-05, 'epoch': 1.73}
+{'loss': 0.2784, 'grad_norm': 0.26254966855049133, 'learning_rate': 8.747390396659709e-05, 'epoch': 1.76}
+{'loss': 0.2619, 'grad_norm': 0.2652628421783447, 'learning_rate': 8.538622129436326e-05, 'epoch': 1.79}
+{'loss': 0.2701, 'grad_norm': 0.31608086824417114, 'learning_rate': 8.329853862212944e-05, 'epoch': 1.82}
+{'loss': 0.2562, 'grad_norm': 0.2935193181037903, 'learning_rate': 8.121085594989561e-05, 'epoch': 1.85}
+{'loss': 0.2637, 'grad_norm': 0.24977760016918182, 'learning_rate': 7.91231732776618e-05, 'epoch': 1.88}
+{'loss': 0.2857, 'grad_norm': 0.28643593192100525, 'learning_rate': 7.703549060542797e-05, 'epoch': 1.91}
+{'loss': 0.2612, 'grad_norm': 0.2827875018119812, 'learning_rate': 7.494780793319416e-05, 'epoch': 1.94}
+{'loss': 0.2365, 'grad_norm': 0.2557653486728668, 'learning_rate': 7.286012526096033e-05, 'epoch': 1.97}
+{'loss': 0.2703, 'grad_norm': 0.25548863410949707, 'learning_rate': 7.077244258872651e-05, 'epoch': 2.0}
+{'loss': 0.2734, 'grad_norm': 0.3858155906200409, 'learning_rate': 6.86847599164927e-05, 'epoch': 2.02}
+{'loss': 0.267, 'grad_norm': 0.3968154489994049, 'learning_rate': 6.659707724425888e-05, 'epoch': 2.05}
+{'loss': 0.254, 'grad_norm': 0.279583603143692, 'learning_rate': 6.450939457202505e-05, 'epoch': 2.08}
+{'loss': 0.268, 'grad_norm': 0.34762150049209595, 'learning_rate': 6.242171189979124e-05, 'epoch': 2.11}
+{'loss': 0.2545, 'grad_norm': 0.28453609347343445, 'learning_rate': 6.033402922755741e-05, 'epoch': 2.14}
+{'loss': 0.246, 'grad_norm': 0.2879520058631897, 'learning_rate': 5.824634655532359e-05, 'epoch': 2.17}
+{'loss': 0.2201, 'grad_norm': 0.36917823553085327, 'learning_rate': 5.615866388308977e-05, 'epoch': 2.2}
+{'loss': 0.2308, 'grad_norm': 0.31272757053375244, 'learning_rate': 5.4070981210855956e-05, 'epoch': 2.23}
+{'loss': 0.2508, 'grad_norm': 0.24160495400428772, 'learning_rate': 5.198329853862213e-05, 'epoch': 2.26}
+{'loss': 0.2537, 'grad_norm': 0.28371405601501465, 'learning_rate': 4.989561586638831e-05, 'epoch': 2.29}
+100%|██████████| 1008/1008 [1:58:36<00:00,  7.06s/it]
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+{'loss': 0.254, 'grad_norm': 0.4187034070491791, 'learning_rate': 4.780793319415449e-05, 'epoch': 2.32}
+{'loss': 0.2318, 'grad_norm': 0.3798210620880127, 'learning_rate': 4.572025052192067e-05, 'epoch': 2.35}
+{'loss': 0.2474, 'grad_norm': 0.3364504873752594, 'learning_rate': 4.363256784968685e-05, 'epoch': 2.38}
+{'loss': 0.2583, 'grad_norm': 0.414083331823349, 'learning_rate': 4.154488517745303e-05, 'epoch': 2.41}
+{'loss': 0.2483, 'grad_norm': 0.3563697338104248, 'learning_rate': 3.945720250521921e-05, 'epoch': 2.44}
+{'loss': 0.2666, 'grad_norm': 0.3019140362739563, 'learning_rate': 3.736951983298539e-05, 'epoch': 2.47}
+{'loss': 0.2401, 'grad_norm': 0.2941141724586487, 'learning_rate': 3.5281837160751566e-05, 'epoch': 2.5}
+{'loss': 0.2411, 'grad_norm': 0.3851751685142517, 'learning_rate': 3.319415448851775e-05, 'epoch': 2.53}
+{'loss': 0.2561, 'grad_norm': 0.3450508713722229, 'learning_rate': 3.110647181628393e-05, 'epoch': 2.56}
+{'loss': 0.2582, 'grad_norm': 0.2725444436073303, 'learning_rate': 2.9018789144050107e-05, 'epoch': 2.59}
+{'loss': 0.2401, 'grad_norm': 0.29913946986198425, 'learning_rate': 2.6931106471816288e-05, 'epoch': 2.62}
+{'loss': 0.2733, 'grad_norm': 0.4615291953086853, 'learning_rate': 2.4843423799582466e-05, 'epoch': 2.65}
+{'loss': 0.2414, 'grad_norm': 0.30999061465263367, 'learning_rate': 2.2755741127348644e-05, 'epoch': 2.68}
+{'loss': 0.2677, 'grad_norm': 0.44910794496536255, 'learning_rate': 2.0668058455114826e-05, 'epoch': 2.71}
+{'loss': 0.2812, 'grad_norm': 0.4839373826980591, 'learning_rate': 1.8580375782881004e-05, 'epoch': 2.74}
+{'loss': 0.2804, 'grad_norm': 0.3565270006656647, 'learning_rate': 1.6492693110647182e-05, 'epoch': 2.77}
+{'loss': 0.2569, 'grad_norm': 0.31562361121177673, 'learning_rate': 1.440501043841336e-05, 'epoch': 2.8}
+{'loss': 0.279, 'grad_norm': 0.3329797089099884, 'learning_rate': 1.2317327766179541e-05, 'epoch': 2.83}
+{'loss': 0.2733, 'grad_norm': 0.30521732568740845, 'learning_rate': 1.0229645093945721e-05, 'epoch': 2.86}
+{'loss': 0.2556, 'grad_norm': 0.27684271335601807, 'learning_rate': 8.1419624217119e-06, 'epoch': 2.89}
+{'loss': 0.2801, 'grad_norm': 0.30833229422569275, 'learning_rate': 6.05427974947808e-06, 'epoch': 2.92}
+{'loss': 0.2534, 'grad_norm': 0.32207655906677246, 'learning_rate': 3.9665970772442595e-06, 'epoch': 2.95}
+{'loss': 0.205, 'grad_norm': 0.3134917914867401, 'learning_rate': 1.8789144050104384e-06, 'epoch': 2.98}
+{'train_runtime': 7116.7865, 'train_samples_per_second': 1.131, 'train_steps_per_second': 0.142, 'train_loss': 0.4264455484965491, 'epoch': 3.0}
+
+Training complete. Model saved to /workspace/output/qwen_unsloth
+
+Unsloth: Model does not have a default image size - using 512
+Running evaluation on test set...
+
+Sample 0
+PREDICTION:
+system
+You are an assistant that detects jam causing objects in images. The possible jam causing objects are: fabrics, rigid-plastic, non-recyclables, large-plastic-films, unopened-plastic-bags, metal, wrappables, wood.
+user
+Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax
+assistant
+non-recyclable 811 1157 248 517
+GROUND TRUTH:
+non-recyclable 811 1157 248 517
+
+Sample 1
+PREDICTION:
+system
+You are an assistant that detects jam causing objects in images. The possible jam causing objects are: fabrics, rigid-plastic, non-recyclables, large-plastic-films, unopened-plastic-bags, metal, wrappables, wood.
+user
+Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax
+assistant
+unopened-plastic-bags 675 963 574 876
+GROUND TRUTH:
+unopened-plastic-bags 675 963 574 876
+
+Sample 2
+PREDICTION:
+system
+You are an assistant that detects jam causing objects in images. The possible jam causing objects are: fabrics, rigid-plastic, non-recyclables, large-plastic-films, unopened-plastic-bags, metal, wrappables, wood.
+user
+Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax
+assistant
+wood 381 901 293 433
+fabrics 1685 1882 293 746
+GROUND TRUTH:
+wood 381 901 293 433
+fabrics 1685 1882 293 746
+
+Sample 3
+PREDICTION:
+system
+You are an assistant that detects jam causing objects in images. The possible jam causing objects are: fabrics, rigid-plastic, non-recyclables, large-plastic-films, unopened-plastic-bags, metal, wrappables, wood.
+user
+Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax
+assistant
+unopened-plastic-bags 1169 1421 367 669
+large-plastic-film 316 689 555 844
+GROUND TRUTH:
+unopened-plastic-bags 1169 1421 367 669
+large-plastic-film 316 689 555 844
+
+Sample 4
+PREDICTION:
+system
+You are an assistant that detects jam causing objects in images. The possible jam causing objects are: fabrics, rigid-plastic, non-recyclables, large-plastic-films, unopened-plastic-bags, metal, wrappables, wood.
+user
+Detect the waste objects in this image and output their bounding boxes in the format: class_name xmin xmax ymin ymax
+assistant
+metal 3 185 320 556
+fabrics 301 450 699 1032
+fabrics 419 549 701 856
+GROUND TRUTH:
+metal 3 185 320 556
+fabrics 301 450 699 1032
+fabrics 419 549 701 856
+
+Test results saved to /workspace/output/qwen_unsloth/test_results.json
+
+FINAL GPU MEMORY STATS
+GPU: NVIDIA A10
+Max reserved:  7.33 GB
+Max allocated: 7.21 GB
