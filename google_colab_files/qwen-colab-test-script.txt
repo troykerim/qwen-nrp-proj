@@ -1,0 +1,149 @@
+!pip install -U unsloth
+!pip install transformers==4.57.1 trl accelerate peft bitsandbytes
+!pip install sentencepiece einops timm qwen-vl-utils
+!pip install pillow matplotlib
+%matplotlib inline
+
+from google.colab import drive
+drive.mount("/content/drive", force_remount=True)
+import os
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
+import json
+import torch
+import unsloth
+from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from transformers import AutoProcessor
+from unsloth import FastVisionModel
+from IPython.display import display
+
+
+
+BASE_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
+ADAPTER_PATH = "/content/drive/MyDrive/qwen-nrp-output"
+TEST_JSONL   = "/content/drive/MyDrive/test-colab.jsonl"
+
+model, processor = FastVisionModel.from_pretrained(
+    BASE_MODEL_ID,
+    load_in_4bit=True,
+    # torch_dtype=torch.float16,
+    # dtype=torch.float16,
+    device_map="auto",
+)
+
+model.load_adapter(ADAPTER_PATH)
+model.eval()
+
+def load_jsonl(path):
+    with open(path, "r") as f:
+        return [json.loads(line) for line in f]
+
+samples = load_jsonl(TEST_JSONL)
+def run_inference(sample):
+    user_msg = next(m for m in sample["messages"] if m["role"] == "user")
+
+    image_path = None
+    prompt = None
+
+    for item in user_msg["content"]:
+        if item["type"] == "image":
+            image_path = item["image"]
+        elif item["type"] == "text":
+            prompt = item["text"]
+
+    image = Image.open(image_path).convert("RGB")
+
+    inputs = processor(
+        images=image,
+        text=prompt,
+        return_tensors="pt"
+    ).to(model.device)
+
+    with torch.no_grad():
+        output = model.generate(
+            **inputs,
+            max_new_tokens=256,
+            do_sample=False
+        )
+
+    decoded = processor.batch_decode(
+        output,
+        skip_special_tokens=True
+    )[0]
+
+    return image, decoded
+    
+def parse_boxes(text):
+    boxes = []
+    for line in text.splitlines():
+        parts = line.strip().split()
+        if len(parts) != 5:
+            continue
+        cls, xmin, xmax, ymin, ymax = parts
+        boxes.append((cls, int(xmin), int(xmax), int(ymin), int(ymax)))
+    return boxes
+
+def parse_ground_truth(sample):
+    gt_msg = next(m for m in sample["messages"] if m["role"] == "assistant")
+    return parse_boxes(gt_msg["content"])
+    
+    
+    
+def visualize_comparison(image, gt_boxes, pred_boxes, title):
+    fig, axes = plt.subplots(1, 2, figsize=(18, 8))
+
+    # Ground Truth
+    axes[0].imshow(image)
+    axes[0].set_title("Ground Truth")
+    for cls, xmin, xmax, ymin, ymax in gt_boxes:
+        rect = patches.Rectangle(
+            (xmin, ymin),
+            xmax - xmin,
+            ymax - ymin,
+            linewidth=2,
+            edgecolor="green",
+            facecolor="none"
+        )
+        axes[0].add_patch(rect)
+        axes[0].text(
+            xmin,
+            ymin - 5,
+            cls,
+            color="green",
+            fontsize=10,
+            backgroundcolor="white"
+        )
+    axes[0].axis("off")
+
+    # Prediction
+    axes[1].imshow(image)
+    axes[1].set_title("Model Prediction")
+    for cls, xmin, xmax, ymin, ymax in pred_boxes:
+        rect = patches.Rectangle(
+            (xmin, ymin),
+            xmax - xmin,
+            ymax - ymin,
+            linewidth=2,
+            edgecolor="red",
+            facecolor="none"
+        )
+        axes[1].add_patch(rect)
+        axes[1].text(
+            xmin,
+            ymin - 5,
+            cls,
+            color="red",
+            fontsize=10,
+            backgroundcolor="white"
+        )
+    axes[1].axis("off")
+
+    #plt.suptitle(title)
+    # plt.show()
+    display(fig)
+    plt.close(fig)
+    
+    
+    
