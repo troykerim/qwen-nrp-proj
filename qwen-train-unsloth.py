@@ -21,7 +21,7 @@ TRAIN_JSONL = "/workspace/data/train.jsonl"
 VALID_JSONL = "/workspace/data/valid.jsonl"
 TEST_JSONL  = "/workspace/data/test.jsonl"
 
-OUTPUT_DIR  = "/workspace/output/qwen_unsloth"
+OUTPUT_DIR  = "/workspace/output/qwen_unsloth2"  # Change output dir each training session
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("Path check:")
@@ -55,6 +55,11 @@ print(f"Train samples: {len(train_data)}")
 print(f"Valid samples: {len(valid_data)}")
 print(f"Test samples : {len(test_data)}\n")
 
+# LoRA Parameters 
+LORA_R = 8
+LORA_ALPHA = 16
+LORA_DROPOUT = 0.05
+
 model, tokenizer = FastVisionModel.from_pretrained(
     MODEL_PATH,
     load_in_4bit=True,
@@ -67,9 +72,9 @@ model = FastVisionModel.get_peft_model(
     finetune_language_layers=True,
     finetune_attention_modules=True,
     finetune_mlp_modules=True,
-    r=8,
-    lora_alpha=16,
-    lora_dropout=0.05,
+    r=LORA_R,
+    lora_alpha=LORA_ALPHA,
+    lora_dropout=LORA_DROPOUT,
     bias="none",
     random_state=42,
 )
@@ -116,7 +121,9 @@ trainer.save_model(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"\nTraining complete. Model saved to {OUTPUT_DIR}\n")
+# End of training loop
 
+# Testing loop (below), may need to remove it because of NRP?
 def extract_assistant_text(text):
     if "<|im_start|>assistant" in text:
         return text.split("<|im_start|>assistant")[-1].strip()
@@ -186,10 +193,30 @@ with open(results_path, "w") as f:
 
 print(f"\nTest results saved to {results_path}")
 
+# Display all hyperparameters used during this training session
+args = trainer.args
+print("LoRA Parameters used in this session")
+print(f"  Lora Rank (r)           : {LORA_R}")
+print(f"  Lora Alpha              : {LORA_ALPHA}")
+print(f"  Lora Droput             : {LORA_DROPOUT}")
+
+print("\nTraining Parameters used in this session")
+print(f"  Learning Rate               : {args.learning_rate}")
+print(f"  Optimizer                   : {args.optim}")
+print(f"  Weight Decay                : {args.weight_decay}")
+print(f"  Number of training epochs   : {args.num_train_epochs}")
+print(f"  Device Train Batch Size     : {args.per_device_train_batch_size}")
+print(f"  Gradient Accumulation Steps : {args.gradient_accumulation_steps}")
+print(f"  Warmup Steps                : {args.warmup_steps}")
+print(f"  Logging Steps               : {args.logging_steps}")
+print(f"  Save Steps                  : {args.save_steps}")
+print(f"  Save Total Limit            : {args.save_total_limit}")
+
+# Check how much VRAM was used by Unsloth and by the current training session overall
 if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
     print("\nFINAL GPU MEMORY STATS")
-    print(f"GPU: {gpu.name}")
+    print(f"GPU used: {gpu.name}")
     print(f"Max reserved:  {torch.cuda.max_memory_reserved() / 1024**3:.2f} GB")
     print(f"Max allocated: {torch.cuda.max_memory_allocated() / 1024**3:.2f} GB")
 
