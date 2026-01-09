@@ -2,6 +2,8 @@
 Helper script that converts all the Pascal VOC XML files from Roboflow into .txt files
 Additionally, it will convert the data inside each XML file into a format that will be used by Qwen and the JSONL files
 
+Pascal VOC is class-name xmin ymin xmax ymax
+
 '''
 import os
 import shutil
@@ -28,14 +30,14 @@ def xml_to_txt(xml_path, txt_path):
             continue
 
         xmin = bndbox.findtext("xmin")
-        xmax = bndbox.findtext("xmax")
         ymin = bndbox.findtext("ymin")
+        xmax = bndbox.findtext("xmax")
         ymax = bndbox.findtext("ymax")
 
-        if None in (xmin, xmax, ymin, ymax):
+        if None in (xmin, xmax, ymin, ymax): # Was incorrect previously!
             continue
 
-        lines.append(f"{name} {xmin} {xmax} {ymin} {ymax}")
+        lines.append(f"{name} {xmin} {ymin} {xmax} {ymax}") # Was incorrect previously!
 
     with open(txt_path, "w") as f:
         f.write("\n".join(lines))
