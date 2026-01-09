@@ -23,7 +23,7 @@ SYSTEM_PROMPT = (
 
 USER_TEXT_PROMPT = (
     "Detect the waste objects in this image and output their bounding boxes "
-    "in the format: class_name xmin xmax ymin ymax"
+    "in the format: class_name xmin ymin ymax xmax"
 )
 
 def build_jsonl():
