@@ -34,7 +34,7 @@ def xml_to_txt(xml_path, txt_path):
         xmax = bndbox.findtext("xmax")
         ymax = bndbox.findtext("ymax")
 
-        if None in (xmin, xmax, ymin, ymax): # Was incorrect previously!
+        if None in (xmin, ymin, xmax, ymax): # Was incorrect previously!
             continue
 
         lines.append(f"{name} {xmin} {ymin} {xmax} {ymax}") # Was incorrect previously!

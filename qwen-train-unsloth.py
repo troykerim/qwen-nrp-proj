@@ -21,7 +21,7 @@ TRAIN_JSONL = "/workspace/data/train.jsonl"
 VALID_JSONL = "/workspace/data/valid.jsonl"
 TEST_JSONL  = "/workspace/data/test.jsonl"
 
-OUTPUT_DIR  = "/workspace/output/qwen_unsloth2"  # Change output dir each training session
+OUTPUT_DIR  = "/workspace/output/qwen_unsloth2"  # Change output directory for each training session
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("Path check:")
@@ -98,7 +98,7 @@ trainer = SFTTrainer(
         per_device_train_batch_size=1,
         gradient_accumulation_steps=8,
         num_train_epochs=3,
-        learning_rate=2e-4,
+        learning_rate=1.5e-4,  # 2e-4
         warmup_steps=50,
         logging_steps=10,
         save_steps=50,
