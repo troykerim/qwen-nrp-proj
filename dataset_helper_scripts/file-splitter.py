@@ -1,8 +1,14 @@
+'''
+Step 1
+Program that parses the raw dataset folder from Roboflow.  Focus on 1 specific portion of the dataset (train/test/valid)
+In Roboflow, each dataset will have train/test/valid and each will have their own folder.  Each folder has 2 sub folders: images and labels.
+Split the image files and the labels from the original roboflow dataset to a new location.
+'''
 import os
 import shutil
 
 # Input and output directories
-INPUT_DIR = "/home/troy/Downloads/Jam Causing Material-v2i.voc/test"
+INPUT_DIR = "/home/troy/Downloads/Jam Causing Material-v2i.voc/test"  # Original Roboflow dataset
 IMG_OUT_DIR = "/home/troy/jam-causing-material-V2/test/images"
 LBL_OUT_DIR = "/home/troy/jam-causing-material-V2/test/labels"
 

@@ -1,4 +1,5 @@
 '''
+Step 3
 Python script to formatter to create the JSONL files to be used by Qwen and Nautilus.
 Edit the file path so that it reads from the correct folder {train, valid or test} and creates train.jsonl, valid.jsonl...
 

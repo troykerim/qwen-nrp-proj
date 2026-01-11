@@ -1,4 +1,5 @@
 '''
+Step 2
 Helper script that converts all the Pascal VOC XML files from Roboflow into .txt files
 Additionally, it will convert the data inside each XML file into a format that will be used by Qwen and the JSONL files
 
