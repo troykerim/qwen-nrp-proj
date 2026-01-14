@@ -56,11 +56,11 @@ LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 
-
-# Weights & Biases initialization
+# W&B configs
 wandb.init(
-    project=os.environ.get("WANDB_PROJECT"),
-    entity=os.environ.get("WANDB_ENTITY"),
+    project=os.environ["WANDB_PROJECT"],
+    entity="troy-kerim-26",
+    reinit=True,
     config={
         "model": "Qwen2.5-VL-7B-Instruct",
         "lora_r": LORA_R,

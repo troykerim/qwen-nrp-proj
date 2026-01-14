@@ -29,17 +29,21 @@ spec:
         args:
           - |
             set -euxo pipefail
-            python -V ; nvidia-smi || true
+            python -V
+            nvidia-smi || true
+
+            echo "[INFO] Installing Weights & Biases..."
+            pip install --no-cache-dir wandb              
 
             echo "[INFO] Checking Qwen model in PVC..."
             ls -al /workspace/models/Qwen2.5-VL-7B-Instruct || true
 
-            echo "[INFO] Dataset contents:"
+            echo "[INFO] Dataset contents..."
             ls -al /workspace/data || true
 
             echo "[INFO] Starting QLoRA fine-tuning with W&B enabled..."
             python /workspace/qwen-train-unsloth.py
-
+        # Add pip install wandb to docker image later
         env:
         - name: DISABLE_VERSION_CHECK
           value: "1"
@@ -71,25 +75,23 @@ spec:
         - name: MKL_NUM_THREADS
           value: "1"
 
-        # Weights & Biases setup
+        # --------------------
+        # Weights & Biases
+        # --------------------
         - name: WANDB_API_KEY
           valueFrom:
             secretKeyRef:
               name: wandb-secret
               key: WANDB_API_KEY
-
         - name: WANDB_PROJECT
           value: qwen-jam-detection
-
         - name: WANDB_ENTITY
-          value: troy-kerim-26
-
+          value: troy-kerim-26-autonomy-research-center-for-steahm--org
+          # value: troy-kerim-26
         - name: WANDB_DIR
           value: /workspace/wandb
-
         - name: WANDB_LOG_MODEL
           value: "false"
-
         - name: WANDB_WATCH
           value: "false"
 
