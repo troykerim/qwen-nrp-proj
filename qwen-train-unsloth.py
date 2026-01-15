@@ -20,7 +20,7 @@ DATASET_DIR = "/workspace/data/jam-causing-material"
 TRAIN_JSONL = "/workspace/data/train.jsonl"
 VALID_JSONL = "/workspace/data/valid.jsonl"
 
-OUTPUT_DIR  = "/workspace/output/qwen_unsloth3"
+OUTPUT_DIR  = "/workspace/output/qwen_unsloth4"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("Path check:")
@@ -101,7 +101,6 @@ processor = AutoProcessor.from_pretrained(
 )
 
 FastVisionModel.for_training(model)
-
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
@@ -115,20 +114,28 @@ trainer = SFTTrainer(
         num_train_epochs=3,
         learning_rate=3e-4,
         warmup_steps=50,
+
         logging_steps=10,
+        evaluation_strategy="steps",
+        eval_steps=50,
+
         save_steps=50,
         save_total_limit=3,
-        optim="adamw_8bit",
+
+        optim="paged_adamw_8bit",
         weight_decay=0.01,
+
         remove_unused_columns=False,
         dataset_text_field="",
         dataset_kwargs={"skip_prepare_dataset": True},
         max_length=2048,
-        report_to="wandb",  # keep this
-        run_name='qwen-NRP-7B-VL', # Rename if I like.
+
+        report_to="wandb",
+        run_name="qwen-NRP-7B-VL",
         seed=42,
     ),
 )
+
 
 print("Starting training...\n")
 trainer.train()
