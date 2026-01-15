@@ -83,18 +83,7 @@ spec:
             secretKeyRef:
               name: wandb-secret
               key: WANDB_API_KEY
-        - name: WANDB_PROJECT
-          value: qwen-jam-detection
-        - name: WANDB_ENTITY
-          value: troy-kerim-26-autonomy-research-center-for-steahm--org
-          # value: troy-kerim-26
-        - name: WANDB_DIR
-          value: /workspace/wandb
-        - name: WANDB_LOG_MODEL
-          value: "false"
-        - name: WANDB_WATCH
-          value: "false"
-
+        
         resources:
           requests:
             nvidia.com/gpu: 1

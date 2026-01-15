@@ -57,7 +57,8 @@ LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 
 # W&B configs
-wandb.init(
+# Delete this
+'''wandb.init(
     project=os.environ["WANDB_PROJECT"],
     entity="troy-kerim-26",
     reinit=True,
@@ -72,7 +73,7 @@ wandb.init(
         "gradient_accumulation": 8,
         "optimizer": "adamw_8bit",
     },
-)
+)'''
 
 model, tokenizer = FastVisionModel.from_pretrained(
     MODEL_PATH,
@@ -123,7 +124,8 @@ trainer = SFTTrainer(
         dataset_text_field="",
         dataset_kwargs={"skip_prepare_dataset": True},
         max_length=2048,
-        report_to="wandb",
+        report_to="wandb",  # keep this
+        run_name='qwen-NRP-7B-VL', # Rename if I like.
         seed=42,
     ),
 )
@@ -136,8 +138,10 @@ tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"\nTraining complete. Model saved to {OUTPUT_DIR}\n")
 
-# W&B logging
-if torch.cuda.is_available():
+
+
+# W&B logging, 
+'''if torch.cuda.is_available():
     gpu = torch.cuda.get_device_properties(0)
     wandb.log({
         "gpu/name": gpu.name,
@@ -145,4 +149,4 @@ if torch.cuda.is_available():
         "gpu/max_allocated_gb": torch.cuda.max_memory_allocated() / 1024**3,
     })
 
-wandb.finish()
+wandb.finish()'''
