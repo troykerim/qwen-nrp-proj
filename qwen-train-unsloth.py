@@ -116,7 +116,7 @@ trainer = SFTTrainer(
         warmup_steps=50,
 
         logging_steps=10,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         eval_steps=50,
 
         save_steps=50,
