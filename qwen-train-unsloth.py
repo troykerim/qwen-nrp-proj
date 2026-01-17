@@ -3,7 +3,6 @@ import json
 import torch
 import wandb
 
-# Nautilus stability flags
 os.environ["TORCH_COMPILE_DISABLE"] = "1"
 os.environ["TORCHINDUCTOR_DISABLE"] = "1"
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
@@ -13,7 +12,7 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 from unsloth import FastVisionModel
 from unsloth.trainer import UnslothVisionDataCollator
 from trl import SFTTrainer, SFTConfig
-from transformers import AutoProcessor
+from transformers import AutoProcessor, EarlyStoppingCallback, TrainerCallback
 
 MODEL_PATH  = "/workspace/models/Qwen2.5-VL-7B-Instruct"
 DATASET_DIR = "/workspace/data/jam-causing-material"
@@ -56,24 +55,37 @@ LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 
-# W&B configs
-# Delete this
-'''wandb.init(
-    project=os.environ["WANDB_PROJECT"],
-    entity="troy-kerim-26",
-    reinit=True,
-    config={
-        "model": "Qwen2.5-VL-7B-Instruct",
-        "lora_r": LORA_R,
-        "lora_alpha": LORA_ALPHA,
-        "lora_dropout": LORA_DROPOUT,
-        "learning_rate": 3e-4,
-        "epochs": 3,
-        "batch_size": 1,
-        "gradient_accumulation": 8,
-        "optimizer": "adamw_8bit",
-    },
-)'''
+# Remove below if it doesn't work
+class PrettyLogCallback(TrainerCallback):
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if not logs:
+            return
+
+        out = {}
+
+        # Train loss
+        if "loss" in logs and logs["loss"] is not None:
+            out["loss"] = f"{float(logs['loss']):.4f}"
+
+        # Eval loss (only appears on eval steps)
+        if "eval_loss" in logs and logs["eval_loss"] is not None:
+            out["eval_loss"] = f"{float(logs['eval_loss']):.4f}"
+
+        # Grad norm
+        if "grad_norm" in logs and logs["grad_norm"] is not None:
+            out["grad_norm"] = f"{float(logs['grad_norm']):.4f}"
+
+        # Learning rate
+        if "learning_rate" in logs and logs["learning_rate"] is not None:
+            out["learning_rate"] = f"{float(logs['learning_rate']):.3e}"
+
+        # Epoch (leave as-is)
+        if "epoch" in logs and logs["epoch"] is not None:
+            out["epoch"] = logs["epoch"]
+
+        if out:
+            print(out)
+
 
 model, tokenizer = FastVisionModel.from_pretrained(
     MODEL_PATH,
@@ -101,23 +113,36 @@ processor = AutoProcessor.from_pretrained(
 )
 
 FastVisionModel.for_training(model)
+
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
     data_collator=UnslothVisionDataCollator(model, tokenizer),
     train_dataset=train_data,
     eval_dataset=valid_data,
+    callbacks=[
+        PrettyLogCallback(),
+        EarlyStoppingCallback(early_stopping_patience=5),
+    ],
     args=SFTConfig(
         output_dir=OUTPUT_DIR,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=8,
-        num_train_epochs=3,
+        num_train_epochs=8,
         learning_rate=3e-4,
-        warmup_steps=50,
+
+        
+        warmup_ratio=0.1, # Warmup ratio instead of warmup_steps
 
         logging_steps=10,
+
         eval_strategy="steps",
         eval_steps=50,
+
+        # For early stopping, remove if it fails
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_loss",
+        greater_is_better=False,
 
         save_steps=50,
         save_total_limit=3,
@@ -131,11 +156,10 @@ trainer = SFTTrainer(
         max_length=2048,
 
         report_to="wandb",
-        run_name="qwen-NRP-7B-VL",
+        run_name="qwen-NRP-7B-VL2",
         seed=42,
     ),
 )
-
 
 print("Starting training...\n")
 trainer.train()
@@ -144,16 +168,3 @@ trainer.save_model(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"\nTraining complete. Model saved to {OUTPUT_DIR}\n")
-
-
-
-# W&B logging, 
-'''if torch.cuda.is_available():
-    gpu = torch.cuda.get_device_properties(0)
-    wandb.log({
-        "gpu/name": gpu.name,
-        "gpu/max_reserved_gb": torch.cuda.max_memory_reserved() / 1024**3,
-        "gpu/max_allocated_gb": torch.cuda.max_memory_allocated() / 1024**3,
-    })
-
-wandb.finish()'''
