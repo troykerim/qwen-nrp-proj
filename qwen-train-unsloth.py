@@ -128,10 +128,8 @@ trainer = SFTTrainer(
         output_dir=OUTPUT_DIR,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=8,
-        num_train_epochs=8,
+        num_train_epochs=10,  # Previously 3, 8
         learning_rate=3e-4,
-
-        
         warmup_ratio=0.1, # Warmup ratio instead of warmup_steps
 
         logging_steps=10,
@@ -168,3 +166,11 @@ trainer.save_model(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"\nTraining complete. Model saved to {OUTPUT_DIR}\n")
+print("\n\n Training Parameters used in this run: ")
+print(f"LoRA rank:          {LORA_R}")
+print(f"LoRA alpha:         {LORA_ALPHA}")
+print(f"LoRA dropout:       {LORA_DROPOUT}")
+print(f"Learning rate:      {trainer.args.learning_rate}")
+print(f"Num train epochs:   {trainer.args.num_train_epochs}")
+print(f"Warmup ratio:       {trainer.args.warmup_ratio}")
+print(f"Optimizer:          {trainer.args.optim}")
