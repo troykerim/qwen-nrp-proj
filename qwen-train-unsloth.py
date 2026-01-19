@@ -166,7 +166,7 @@ trainer.save_model(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"\nTraining complete. Model saved to {OUTPUT_DIR}\n")
-print("\n\n Training Parameters used in this run: ")
+print("\n\nTraining Parameters used in this run: ")
 print(f"LoRA rank:          {LORA_R}")
 print(f"LoRA alpha:         {LORA_ALPHA}")
 print(f"LoRA dropout:       {LORA_DROPOUT}")
