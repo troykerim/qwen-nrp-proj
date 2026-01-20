@@ -11,13 +11,17 @@ Output:
 
 '''
 import os
+os.environ["TORCHDYNAMO_DISABLE"] = "1"
+os.environ["TORCH_COMPILE_DISABLE"] = "1"
+os.environ["TRITON_DISABLE_LINE_INFO"] = "1"
+os.environ["CUDA_MODULE_LOADING"] = "LAZY"
+
 import json
 import torch
 from PIL import Image
 from transformers import Qwen2_5_VLProcessor
+import unsloth
 from unsloth import FastVisionModel
-
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
 BASE_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -27,20 +31,24 @@ OUTPUT_DIR   = "/workspace/output/qwen_unsloth4/predictions"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Load model 
+
 model, _ = FastVisionModel.from_pretrained(
     BASE_MODEL_ID,
     load_in_4bit=True,
     device_map="auto",
 )
+
 model.load_adapter(ADAPTER_PATH)
 model.eval()
 
-processor = Qwen2_5_VLProcessor.from_pretrained(BASE_MODEL_ID)
+processor = Qwen2_5_VLProcessor.from_pretrained(
+    BASE_MODEL_ID,
+    use_fast=True
+)
 
 print("Model and processor loaded.")
 
-# Dataset loading
+
 def load_jsonl(path):
     with open(path, "r") as f:
         return [json.loads(line) for line in f]
@@ -48,7 +56,7 @@ def load_jsonl(path):
 samples = load_jsonl(TEST_JSONL)
 print(f"Loaded {len(samples)} test samples.")
 
-# Inference message
+# Inference 
 def run_inference(sample):
     user_msg = next(m for m in sample["messages"] if m["role"] == "user")
 
@@ -58,7 +66,7 @@ def run_inference(sample):
             image_path = item["image"]
 
     if image_path is None:
-        raise ValueError("No image path found in sample")
+        raise RuntimeError("No image path found in sample")
 
     image = Image.open(image_path).convert("RGB")
 
@@ -112,22 +120,24 @@ def run_inference(sample):
 
     return image_path, result
 
-# Parse model output
+# Parse predicted boxes
 def parse_boxes(text):
-    boxes = []
+    parsed = []
     for line in text.strip().splitlines():
         parts = line.strip().split()
         if len(parts) != 5:
             continue
         cls, xmin, xmax, ymin, ymax = parts
         try:
-            boxes.append(f"{cls} {int(xmin)} {int(xmax)} {int(ymin)} {int(ymax)}")
+            parsed.append(
+                f"{cls} {int(xmin)} {int(xmax)} {int(ymin)} {int(ymax)}"
+            )
         except ValueError:
             continue
-    return boxes
+    return parsed
 
 # Testing loop
-print("Running inference on test set...")
+print("Running inference on test dataset...")
 
 for idx, sample in enumerate(samples):
     try:
@@ -136,6 +146,7 @@ for idx, sample in enumerate(samples):
 
         image_name = os.path.basename(image_path)
         base_name, _ = os.path.splitext(image_name)
+
         pred_file = os.path.join(
             OUTPUT_DIR, f"{base_name}-pred.txt"
         )
@@ -144,9 +155,10 @@ for idx, sample in enumerate(samples):
             for line in boxes:
                 f.write(line + "\n")
 
-        print(f"[{idx+1}/{len(samples)}] Wrote {pred_file}")
+        print(f"[{idx+1}/{len(samples)}] Saved {pred_file}")
 
     except Exception as e:
         print(f"[{idx+1}] ERROR:", e)
 
 print("Inference complete.")
+
