@@ -21,9 +21,9 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
 BASE_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
-ADAPTER_PATH  = ""
-TEST_JSONL    = ""
-OUTPUT_DIR    = ""
+ADAPTER_PATH = "/workspace/output/qwen_unsloth4"
+TEST_JSONL   = "/workspace/data/test.jsonl"
+OUTPUT_DIR   = "/workspace/output/qwen_unsloth4/predictions"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

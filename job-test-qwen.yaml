@@ -5,7 +5,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: qwen-unsloth-test-inference
+  name: qwen-test-job
   namespace: nsf-maica
 spec:
   backoffLimit: 0
@@ -35,17 +35,15 @@ spec:
             python -V
             nvidia-smi || true
 
-            echo "[INFO] Verifying model adapter directory..."
-            ls -al /workspace/models/qwen-finetuned || true
-            # Update with correct file path
+            echo "[INFO] Checking adapter output directory..."
+            ls -al /workspace/output/qwen_unsloth4
 
-            echo "[INFO] Verifying test dataset..."
-            ls -al /workspace/data || true
-            # Update with correct file path
+            echo "[INFO] Checking test dataset..."
+            ls -al /workspace/data/jam-causing-material/test
+            ls -al /workspace/data/test.jsonl
 
-            echo "[INFO] Starting inference job..."
-            python /workspace/qwen_test_inference.py
-            # Update with correct file path if script name differs
+            echo "[INFO] Running inference..."
+            python /workspace/qwen-test.py
 
         env:
         - name: DISABLE_VERSION_CHECK
@@ -102,3 +100,4 @@ spec:
       - name: work
         persistentVolumeClaim:
           claimName: internvl-work
+
