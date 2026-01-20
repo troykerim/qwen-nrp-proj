@@ -1,0 +1,104 @@
+
+
+# UPDATE THE FILE PATHS
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qwen-unsloth-test-inference
+  namespace: nsf-maica
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nvidia.com/gpu.product
+                operator: In
+                values:
+                  - NVIDIA-A10
+
+      containers:
+      - name: inference
+        image: docker.io/troyk500/qwen-nrp-unsloth:v1
+        imagePullPolicy: Always
+        command: ["/bin/bash", "-lc"]
+        args:
+          - |
+            set -euxo pipefail
+            python -V
+            nvidia-smi || true
+
+            echo "[INFO] Verifying model adapter directory..."
+            ls -al /workspace/models/qwen-finetuned || true
+            # Update with correct file path
+
+            echo "[INFO] Verifying test dataset..."
+            ls -al /workspace/data || true
+            # Update with correct file path
+
+            echo "[INFO] Starting inference job..."
+            python /workspace/qwen_test_inference.py
+            # Update with correct file path if script name differs
+
+        env:
+        - name: DISABLE_VERSION_CHECK
+          value: "1"
+
+        - name: HF_HOME
+          value: /workspace/.cache/huggingface
+        - name: TRANSFORMERS_CACHE
+          value: /workspace/.cache/huggingface
+        - name: HF_DATASETS_CACHE
+          value: /workspace/.cache/huggingface/datasets
+        - name: PIP_CACHE_DIR
+          value: /workspace/.cache/pip
+        - name: TMPDIR
+          value: /workspace/tmp
+
+        - name: HF_HUB_ENABLE_HF_TRANSFER
+          value: "1"
+
+        - name: HUGGING_FACE_HUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hf-token
+              key: HUGGING_FACE_HUB_TOKEN
+
+        - name: PYTORCH_CUDA_ALLOC_CONF
+          value: "max_split_size_mb:64,expandable_segments:False"
+
+        - name: TOKENIZERS_PARALLELISM
+          value: "false"
+
+        - name: OMP_NUM_THREADS
+          value: "1"
+        - name: MKL_NUM_THREADS
+          value: "1"
+
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            cpu: "8"
+            memory: "24Gi"
+            ephemeral-storage: "40Gi"
+          limits:
+            nvidia.com/gpu: 1
+            cpu: "16"
+            memory: "64Gi"
+            ephemeral-storage: "100Gi"
+
+        volumeMounts:
+        - name: work
+          mountPath: /workspace
+
+      volumes:
+      - name: work
+        persistentVolumeClaim:
+          claimName: internvl-work
