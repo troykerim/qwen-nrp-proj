@@ -8,9 +8,9 @@ import os
 import shutil
 
 # Input and output directories
-INPUT_DIR = "/home/troy/Downloads/Jam Causing Material-v2i.voc/test"  # Original Roboflow dataset
-IMG_OUT_DIR = "/home/troy/jam-causing-material-V2/test/images"
-LBL_OUT_DIR = "/home/troy/jam-causing-material-V2/test/labels"
+INPUT_DIR = "/home/troy/Downloads/jam-causing-material.v4i.voc/valid"  # Original Roboflow dataset
+IMG_OUT_DIR = "/home/troy/jam-causing-material-V3/valid/images"
+LBL_OUT_DIR = "/home/troy/jam-causing-material-V3/valid/labels"
 
 # Create output directories if they don't exist
 os.makedirs(IMG_OUT_DIR, exist_ok=True)

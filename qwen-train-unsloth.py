@@ -15,11 +15,11 @@ from trl import SFTTrainer, SFTConfig
 from transformers import AutoProcessor, EarlyStoppingCallback, TrainerCallback
 
 MODEL_PATH  = "/workspace/models/Qwen2.5-VL-7B-Instruct"
-DATASET_DIR = "/workspace/data/jam-causing-material"
+DATASET_DIR = "/workspace/data/jam-causing-material-V3"
 TRAIN_JSONL = "/workspace/data/train.jsonl"
 VALID_JSONL = "/workspace/data/valid.jsonl"
 
-OUTPUT_DIR  = "/workspace/output/qwen_unsloth4"
+OUTPUT_DIR  = "/workspace/output/qwen_unsloth5"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("Path check:")
@@ -154,7 +154,7 @@ trainer = SFTTrainer(
         max_length=2048,
 
         report_to="wandb",
-        run_name="qwen-NRP-7B-VL2",
+        run_name="qwen-NRP-7B-VL3",
         seed=42,
     ),
 )

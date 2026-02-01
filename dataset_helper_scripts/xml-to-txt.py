@@ -3,16 +3,17 @@ Step 2
 Helper script that converts all the Pascal VOC XML files from Roboflow into .txt files
 Additionally, it will convert the data inside each XML file into a format that will be used by Qwen and the JSONL files
 
-Pascal VOC is class-name xmin ymin xmax ymax
+Offical Pascal VOC is: class-name xmin ymin xmax ymax 
+But in roboflow it produces xmin xmax ymin ymax for some some reason
 
 '''
 import os
 import shutil
 import xml.etree.ElementTree as ET
 
-INPUT_DIR = "/home/troy/jam-causing-material-V2/test/labels"
-OUTPUT_TXT_DIR = "/home/troy/jam-causing-material-V2/test/labels"
-ARCHIVE_XML_DIR = "/home/troy/jam-causing-material-V2-xml"
+INPUT_DIR = "/home/troy/jam-causing-material-V3/valid/labels"
+OUTPUT_TXT_DIR = "/home/troy/jam-causing-material-V3/valid/labels"
+ARCHIVE_XML_DIR = "/home/troy/jam-causing-material-V3-xml"
 
 os.makedirs(OUTPUT_TXT_DIR, exist_ok=True)
 os.makedirs(ARCHIVE_XML_DIR, exist_ok=True)
@@ -35,10 +36,10 @@ def xml_to_txt(xml_path, txt_path):
         xmax = bndbox.findtext("xmax")
         ymax = bndbox.findtext("ymax")
 
-        if None in (xmin, ymin, xmax, ymax): # Was incorrect previously!
+        if None in (xmin, xmax, ymin, ymax): # Using Roboflow format
             continue
 
-        lines.append(f"{name} {xmin} {ymin} {xmax} {ymax}") # Was incorrect previously!
+        lines.append(f"{name} {xmin} {xmax} {ymin} {ymax}") 
 
     with open(txt_path, "w") as f:
         f.write("\n".join(lines))

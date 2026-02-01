@@ -10,7 +10,7 @@ import os
 import json
 from pathlib import Path
 
-LABEL_DIR = Path("/home/troy/jam-causing-material/valid/labels")
+LABEL_DIR = Path("/home/troy/jam-causing-material-V3/valid/labels")
 OUTPUT_JSONL = Path("/home/troy/qwen-nrp-proj/valid.jsonl")
 
 IMAGE_BASE_PATH = "/workspace/data/jam-causing-material/valid/images"   # Dataset Path for Nautilus
@@ -24,7 +24,7 @@ SYSTEM_PROMPT = (
 
 USER_TEXT_PROMPT = (
     "Detect the waste objects in this image and output their bounding boxes "
-    "in the format: class_name xmin ymin ymax xmax"
+    "in the format: class_name xmin xmax ymin ymax "
 )
 
 def build_jsonl():
