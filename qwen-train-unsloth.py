@@ -19,7 +19,7 @@ DATASET_DIR = "/workspace/data/jam-causing-material-V3"
 TRAIN_JSONL = "/workspace/data/train.jsonl"
 VALID_JSONL = "/workspace/data/valid.jsonl"
 
-OUTPUT_DIR  = "/workspace/output/qwen_unsloth5"
+OUTPUT_DIR  = "/workspace/output/qwen_unsloth6"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("Path check:")
@@ -50,12 +50,10 @@ valid_data = load_jsonl(VALID_JSONL)
 print(f"Train samples: {len(train_data)}")
 print(f"Valid samples: {len(valid_data)}\n")
 
-# LoRA Parameters
 LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 
-# Remove below if it doesn't work
 class PrettyLogCallback(TrainerCallback):
     def on_log(self, args, state, control, logs=None, **kwargs):
         if not logs:
@@ -63,29 +61,23 @@ class PrettyLogCallback(TrainerCallback):
 
         out = {}
 
-        # Train loss
         if "loss" in logs and logs["loss"] is not None:
             out["loss"] = f"{float(logs['loss']):.4f}"
 
-        # Eval loss (only appears on eval steps)
         if "eval_loss" in logs and logs["eval_loss"] is not None:
             out["eval_loss"] = f"{float(logs['eval_loss']):.4f}"
 
-        # Grad norm
         if "grad_norm" in logs and logs["grad_norm"] is not None:
             out["grad_norm"] = f"{float(logs['grad_norm']):.4f}"
 
-        # Learning rate
         if "learning_rate" in logs and logs["learning_rate"] is not None:
             out["learning_rate"] = f"{float(logs['learning_rate']):.3e}"
 
-        # Epoch (leave as-is)
         if "epoch" in logs and logs["epoch"] is not None:
             out["epoch"] = logs["epoch"]
 
         if out:
             print(out)
-
 
 model, tokenizer = FastVisionModel.from_pretrained(
     MODEL_PATH,
@@ -128,16 +120,15 @@ trainer = SFTTrainer(
         output_dir=OUTPUT_DIR,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=8,
-        num_train_epochs=10,  # Previously 3, 8
+        num_train_epochs=10,
         learning_rate=3e-4,
-        warmup_ratio=0.1, # Warmup ratio instead of warmup_steps
+        warmup_ratio=0.1,
 
         logging_steps=10,
 
         eval_strategy="steps",
         eval_steps=50,
 
-        # For early stopping, remove if it fails
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
         greater_is_better=False,
@@ -166,7 +157,8 @@ trainer.save_model(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"\nTraining complete. Model saved to {OUTPUT_DIR}\n")
-print("\n\nTraining Parameters used in this run: ")
+
+print("\nTraining Parameters used in this run:")
 print(f"LoRA rank:          {LORA_R}")
 print(f"LoRA alpha:         {LORA_ALPHA}")
 print(f"LoRA dropout:       {LORA_DROPOUT}")
@@ -174,3 +166,14 @@ print(f"Learning rate:      {trainer.args.learning_rate}")
 print(f"Num train epochs:   {trainer.args.num_train_epochs}")
 print(f"Warmup ratio:       {trainer.args.warmup_ratio}")
 print(f"Optimizer:          {trainer.args.optim}")
+
+if torch.cuda.is_available():
+    total_vram = torch.cuda.get_device_properties(0).total_memory / (1024 ** 3)
+    used_vram  = torch.cuda.max_memory_allocated(0) / (1024 ** 3)
+
+    print("\nGPU VRAM Summary:")
+    print(f"Total GPU VRAM available: {total_vram:.2f} GB")
+    print(f"Peak GPU VRAM used:       {used_vram:.2f} GB")
+else:
+    print("\nGPU VRAM Summary:")
+    print("CUDA not available")
