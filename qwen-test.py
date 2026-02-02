@@ -25,7 +25,7 @@ from unsloth import FastVisionModel
 
 
 BASE_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
-ADAPTER_PATH = "/workspace/output/qwen_unsloth4"
+ADAPTER_PATH = "/workspace/output/qwen_unsloth5"
 TEST_JSONL   = "/workspace/data/test.jsonl"
 OUTPUT_DIR   = "/workspace/output/qwen_unsloth4/predictions"
 
