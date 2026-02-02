@@ -1,4 +1,8 @@
 '''
+Step 2: Testing/Inference 
+
+This script should be run after training script has run.
+
 Testing script that performs testing/inference on the fine-tuned model
 Inputs:
     1. test.jsonl file (contains paths in NRP to test images & label txt files)
@@ -148,7 +152,7 @@ for idx, sample in enumerate(samples):
         base_name, _ = os.path.splitext(image_name)
 
         pred_file = os.path.join(
-            OUTPUT_DIR, f"{base_name}-pred.txt"
+            OUTPUT_DIR, f"{base_name}.txt"  # Dropping the -pred because of naming conflicts in metrics script
         )
 
         with open(pred_file, "w") as f:
@@ -160,5 +164,5 @@ for idx, sample in enumerate(samples):
     except Exception as e:
         print(f"[{idx+1}] ERROR:", e)
 
-print("Inference complete.")
+print("Inference (Testing) complete.")
 
