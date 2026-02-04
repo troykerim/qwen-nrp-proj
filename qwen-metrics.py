@@ -11,9 +11,10 @@ BOX_FORMAT = "XXYY"  # xmin xmax ymin ymax
 
 PRED_SUFFIX = "-pred.txt"  # Drop the prefix since it causes errors
 
-GT_LABEL_DIR = "/home/troy/jam-causing-material/test/labels"
-PRED_LABEL_DIR = "/home/troy/jam-causing-material-predictions"
-GT_IMAGE_DIR = "/home/troy/jam-causing-material-V2/test/images"
+GT_LABEL_DIR = "/home/troy/jam-causing-material-V3/test/labels"
+# PRED_LABEL_DIR = "/home/troy/jam-causing-material-predictions"
+PRED_LABEL_DIR = "/home/troy/qwen-nrp-output4"
+GT_IMAGE_DIR = "/home/troy/jam-causing-material-V3/test/images"
 
 NUM_DEBUG_IMAGES = 4
 
