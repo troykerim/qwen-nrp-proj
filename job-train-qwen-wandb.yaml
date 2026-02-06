@@ -43,7 +43,6 @@ spec:
 
             echo "[INFO] Starting QLoRA fine-tuning with W&B enabled..."
             python /workspace/qwen-train-unsloth.py
-        # Add pip install wandb to docker image later
         env:
         - name: DISABLE_VERSION_CHECK
           value: "1"
@@ -75,9 +74,6 @@ spec:
         - name: MKL_NUM_THREADS
           value: "1"
 
-        # --------------------
-        # Weights & Biases
-        # --------------------
         - name: WANDB_API_KEY
           valueFrom:
             secretKeyRef:
