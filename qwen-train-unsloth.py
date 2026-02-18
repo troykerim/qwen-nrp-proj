@@ -120,8 +120,8 @@ trainer = SFTTrainer(
         output_dir=OUTPUT_DIR,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=8,
-        num_train_epochs=10,
-        learning_rate=3e-4,
+        num_train_epochs=10,    # 3 (Start), 5, 10...
+        learning_rate=2e-4,
         warmup_ratio=0.1,
 
         logging_steps=10,
