@@ -14,6 +14,7 @@ from unsloth.trainer import UnslothVisionDataCollator
 from trl import SFTTrainer, SFTConfig
 from transformers import AutoProcessor, EarlyStoppingCallback, TrainerCallback
 
+# Change to 3.5-4B
 MODEL_PATH  = "/workspace/models/Qwen2.5-VL-7B-Instruct"
 DATASET_DIR = "/workspace/data/jam-causing-material-V3"
 TRAIN_JSONL = "/workspace/data/train.jsonl"
