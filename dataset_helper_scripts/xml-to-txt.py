@@ -11,9 +11,9 @@ import os
 import shutil
 import xml.etree.ElementTree as ET
 
-INPUT_DIR = "/home/troy/jam-causing-material-V3/valid/labels"
-OUTPUT_TXT_DIR = "/home/troy/jam-causing-material-V3/valid/labels"
-ARCHIVE_XML_DIR = "/home/troy/jam-causing-material-V3-xml"
+INPUT_DIR = "/home/troy/jam-causing-voc-aug-nrp/test/labels"
+OUTPUT_TXT_DIR = "/home/troy/jam-causing-voc-aug-nrp/test/labels"
+ARCHIVE_XML_DIR = "/home/troy/jam-causing-voc-aug-nrp-xml"
 
 os.makedirs(OUTPUT_TXT_DIR, exist_ok=True)
 os.makedirs(ARCHIVE_XML_DIR, exist_ok=True)

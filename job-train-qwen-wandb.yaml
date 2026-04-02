@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: qwen-unsloth-wandb-job
-  namespace: nsf-maica
+  namespace: csun-arcs
 spec:
   backoffLimit: 0
   ttlSecondsAfterFinished: 86400
@@ -42,7 +42,7 @@ spec:
             ls -al /workspace/data || true
 
             echo "[INFO] Starting QLoRA fine-tuning with W&B enabled..."
-            python /workspace/qwen-train-unsloth.py
+            python /workspace/qwen-scripts/qwen-train-unsloth.py
         env:
         - name: DISABLE_VERSION_CHECK
           value: "1"
@@ -99,4 +99,4 @@ spec:
       volumes:
       - name: work
         persistentVolumeClaim:
-          claimName: internvl-work
+          claimName: recykool-work

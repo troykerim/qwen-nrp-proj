@@ -10,10 +10,10 @@ import os
 import json
 from pathlib import Path
 
-LABEL_DIR = Path("/home/troy/jam-causing-material-V3/test/labels")
-OUTPUT_JSONL = Path("/home/troy/qwen-nrp-proj/test.jsonl")
+LABEL_DIR = Path("/home/troy/jam-causing-voc-aug-nrp/valid/labels")
+OUTPUT_JSONL = Path("/home/troy/qwen-nrp-proj/valid.jsonl")
 
-IMAGE_BASE_PATH = "/workspace/data/jam-causing-material-V3/test/images"   # Dataset Path for Nautilus; change if you add a new dataset folder to PVC!
+IMAGE_BASE_PATH = "/home/troy/jam-causing-voc-aug-nrp/valid/images"   # Dataset Path for Nautilus; change if you add a new dataset folder to PVC!
 
 SYSTEM_PROMPT = (
     "You are an assistant that detects jam causing objects in images. "
