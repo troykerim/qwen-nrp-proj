@@ -13,7 +13,7 @@ from pathlib import Path
 LABEL_DIR = Path("/home/troy/jam-causing-voc-aug-nrp/valid/labels")
 OUTPUT_JSONL = Path("/home/troy/qwen-nrp-proj/valid.jsonl")
 
-IMAGE_BASE_PATH = "/home/troy/jam-causing-voc-aug-nrp/valid/images"   # Dataset Path for Nautilus; change if you add a new dataset folder to PVC!
+IMAGE_BASE_PATH = "/home/troy/jam-causing-voc-aug-voc/valid/images"   # Dataset Path for Nautilus; change if you add a new dataset folder to PVC!
 
 SYSTEM_PROMPT = (
     "You are an assistant that detects jam causing objects in images. "
